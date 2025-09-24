@@ -205,3 +205,38 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# === ROS / Catkin / Colcon ===
+devel/
+build/
+install/
+log/
+logs/
+
+# ROS specific
+.msg_srv/
+.msg/
+.srv/
+cmake-build-*/
+*.launch~
+*.test
+*.bag
+*.dae
+*.stl
+*.urdf.xacro
+*.pyc
+*.swp
+
+# Gazebo / Simulation
+.gazebo/
+*.world
+*.model
+*.sdf
+*.config
+
+# RViz
+*.rviz
+
+# Catkin / Colcon Python stuff
+.colcon/
+catkin_generated/
