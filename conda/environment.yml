@@ -1,0 +1,12 @@
+name: chat2robot
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - google-generativeai>=0.3.0
+      - langchain
+      - faiss-cpu
+      - numpy
+      - requests
