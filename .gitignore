@@ -240,3 +240,6 @@ cmake-build-*/
 # Catkin / Colcon Python stuff
 .colcon/
 catkin_generated/
+
+# Ignore Windows Zone Identifier files
+*.Zone.Identifier
