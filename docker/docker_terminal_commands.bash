@@ -1,1 +1,0 @@
-docker exec -it ros2_moveit_container bash -c "cd /app && exec bash"
