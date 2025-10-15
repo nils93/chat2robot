@@ -1,0 +1,33 @@
+services:
+  ros2:
+    image: ros2-turtlebot3
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: ros2_turtlebot3_gpu
+    privileged: true
+    network_mode: host
+    command: /bin/bash
+    tty: true
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ../ros2_ws:/home/ubuntu/ros2_ws
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - $XAUTHORITY:/root/.Xauthority
+    environment:
+      QT_X11_NO_MITSHM: 1
+      DISPLAY: $DISPLAY
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: all
+      NVIDIA_REQUIRE_CUDA: "cuda>=11.3"
+
+volumes:
+  ros2_ws:
+    driver: local
