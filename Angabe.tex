@@ -1,0 +1,95 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{hyperref}
+\usepackage{xcolor}
+\title{Projektangabe MRK: LLM als Steuerzentrale}
+\author{Wilfried Wöber}
+\date{August 2025}
+\begin{document}
+\maketitle
+\section{Angabe}
+Erstellen Sie einen Chatbot zur Steuerung Ihrer Roboteranwendung. 
+Dieser Chatbot soll folgende Funktionen beinhalten:
+\begin{enumerate}
+    \item \textbf{LLM Interface:} Implementieren Sie ein Interface zu einem kostenfreien large language model (z.B.: Gemini 1.5 flash). 
+    \item \textbf{Retrieval-Augmented Generation:} Implementieren Sie frei zugängliche Chunking und word embedding Methoden für einen Retrieval-Augmented Generation (RAG) Ansatz. Nutzen Sie einen lokalen Vectorstore. 
+    \item \textbf{Chatbot:} Implementieren Sie basierend auf den beiden vorhergehenden Punkten einen Chatbot. Für diese Implementierung müssen Sie eine Chat-History implementieren.
+    \item \textbf{Tooling:} Geben Sie via \textit{Tooling} Ihrem Chatbot die Möglichkeit den Roboter zu steuern. Bauen Sie Ihr System auf dem agentic Prinzip auf (keine hardgecodedtes Tooling). Das Tool soll Goals akzeptieren und den Roboter dementsprechend anteuern. 
+\end{enumerate}
+Die Anwendung soll schlussendlich durch natürlicher geschriebener Sprache in Konversation zwischen dem Chatbot und den Anwender*innen den Roboter zu Ziele schicken. 
+Die Ziele sollen nicht via Koordinaten, sondern via Namen der Ziele (siehe unten) bezeichnet werden.
+Ein Beispiel ist
+\begin{center}
+    \textit{Fahren bitte in dein Zuhause.}
+\end{center}
+Adaptieren Sie die System- und Userprompt für Ihre Anwendung. 
+Der Chatbot soll so lange nachfragen bis Ziele abgeleitet werden können. 
+Erste dann soll autonom (!) das Tool angesprochen werden.
+%-----------------------%
+%--- Details Chatbot ---%
+%-----------------------%
+\subsection{Details Chatbot}
+Sie können Orchestrierungsframeworks wie \textit{Langchain} oder \textit{Haystack} zur Entwicklung verwenden. 
+Weiters können Sie bestehende Module für LLM-Interfaces, den Vectorstore, Chunking, Text Embedder, Chat History und Tools verwenden. 
+Weitere Hilfestellugnen sind:
+\begin{enumerate}
+    \item LLM Iterface und Hyperparameter: Beachten Sie die Hyperparameter \textit{Temperature} und \textit{top\_p} bei der Integration des LLM-Interfaces. Beachten Sie weiters, dass bei den meisten LLM Implementierungen der API-Key als Umgebungsvariable vorhanden sein muss. 
+    Diese kann via \textit{\$export name-Variable=Key} im Terminal dem Programm zur Verfügung gestellt werden.
+
+    \href{https://python.langchain.com/docs/integrations/chat/google_generative_ai/}{Hier} finden Sie Tipps.
+    \item RAG: Sie müssen mindestens diese Angabe dem RAG-System zur Verfügung stellen. Beachten Sie, dass die Chunk-Größe und Überlappung bei Standardverfahren essentielle Parameter sind, welche die Qualität der Anwendung signifikant beeinflussen.
+
+    \href{https://python.langchain.com/docs/tutorials/rag/}{Hier} finden Sie Beispiele.
+    \item Chatbot: Sie können einen Chatbot selbseständig oder mit bestehenden Modulen (siehe RAG-Link) implementieren. Sollten Sie bestehende Graphen-basierte Lösungen nutzen werden diesbezüglich Fragen bei der Endpräsentation gestellt werden.
+    \item Tools: Für den Tool Aufruf können Sie bestehende Lösungen nutzen (siehe MCP) bzw. Implementierungen in Orchestrierungsframeworks (siehe \href{https://python.langchain.com/docs/concepts/tool_calling/}{hier (empfohlen)}) nutzen.
+\end{enumerate}
+%--------------------%
+%--- ROS Umgebung ---%
+%--------------------%
+\subsection{Umgebung des Roboters}
+Die ROS Umgebung finden Sie im Moodlekurs. Sie können frei wählen, ob Sie ROS1 (Support vom Lektor) oder ROS2 (freiwillig) nutzen wollen. 
+
+Prinzipiell benötigen Sie keine neuen ROS-Fähigkeiten. Der inhaltliche Schwerpunkt dieser LV ist die Entwicklung des Chatbots, welcher eine bestehende ROS Umgebung ansteuern soll.
+
+Folgende Posen sind in der Karte definiert:
+
+\textcolor{red}{Es folgen hier vier Posen, welche Sie selbstständig basierend auf Ihrer ROS-Umgebung in der im Moodlekurs zur Verfügung stehenden tex Datei hinzufügen müssen.
+Diesen Schritt benötigen Sie für das RAG-System. Füllen Sie daher selbstständig die folgenden Posen aus. Löschen Sie im Anschluss diesen roten Text.}
+
+\begin{enumerate}
+\item Home-Position: $x: \_\_\_ \ \  y: \_\_\_ \ \ \theta: \_\_\_$
+\item Pose A: $x: \_\_\_ \ \  y: \_\_\_ \ \ \theta: \_\_\_$
+\item Pose B: $x: \_\_\_ \ \  y: \_\_\_ \ \ \theta: \_\_\_$
+\item Ziel: $x: \_\_\_ \ \  y: \_\_\_ \ \ \theta: \_\_\_$
+\end{enumerate}
+
+\textbf{Anmerkung:} Experimentieren Sie. Versuchen Sie Anweisungen wie ''\textit{Düse zur Home-Position, fahre dann von Punkt B zur Pose A und dann zum Ziel.}''. 
+
+%------------%
+%--- Doku ---%
+%------------%
+\subsection{Entwicklung und Dokumentation}
+Nutzen Sie Github zur Entwicklung.
+Die \textit{README.md} Datei soll eine vollständige Dokumentation Ihres Projekts enthalten.
+Weiters sollen Ihre Erkenntnisse dokumentiert sein. 
+Diese müssen mindestens folgende Aspekte beinhalten:
+\begin{itemize}
+    \item Auswirkung unterschiedlicher Sprache (z.B.: Deutsch, Englisch)
+    \item Auswirkung unterschiedlicher Chunking Hyperparameter bzw. Chunking Ansätzen
+    \item Ihre Empfehlung für industrielle Nutzung. Wäre ein Chatbot zur Steuerung eines Industrieroboters aus Ihrer Sicht empfehlenswert? Was wären die Vorteile/Nachteile.
+    \item (optional, empfohlen) Die Auswirkung von unterschiedlichen LLM.
+\end{itemize}
+
+Bereiten Sie für die letzte Einheit dieser LV eine Präsentation (Slides und eine Livepräsentation) vor. 
+Die Benotung ist individuell. 
+Die Basis der Benotung ist:
+\begin{enumerate}
+    \item Korrekte und vollständige Implementierung des Chatbots inkl. RAG und Tooling. ($60\%$)
+    \item Funktions der Anwendung. ($20\%$)
+    \item Dokumentation ($20\%$)
+\end{enumerate}
+Alle Teammitglieder werden über alle Aspekte und den Quellcode befragt. 
+Sollte ein Teammitglied Fragen nicht ausreichend beantworten können wird für dieses Teammitglied das Projekt negativ bewertet. 
+Ein neues, individuelles Projekt ist dann als Zweitantritt durchzuführen.
+Sollte dieses Projekt wieder negativ bewertet werden wird ein drittes Projekt definiert, dessen Lösung vor einer Kommission in einer kommissionellen Prüfung präsentiert werden muss.
+\end{document}
