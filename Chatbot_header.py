@@ -20,7 +20,7 @@ class RAG_Functions:
         splitter = RecursiveCharacterTextSplitter(
             chunk_size=400,     # wie groß ein Chunk maximal sein darf
             chunk_overlap=50,   # wie viel sich zwei Chunks überschneiden
-            separators=["\n", ".", " "]  # wo vorzugsweise getrennt werden soll
+            separators=["\n", "."]  # wo vorzugsweise getrennt werden soll
         )
         
         #2. Chunking ausführen
@@ -52,6 +52,6 @@ class RAG_Functions:
 
         # 3 Ausgabe oder Weitergabe ans LLM
         for i, doc in enumerate(self.similar_vectors):
-            print(f"Treffer {i+1}: {doc.page_content[:200]}...")
+            print(f"Treffer {i+1}: {doc.page_content[:400]}")
         
         print("-> 4. Vergleich UserPromt mit VectorStorage durchgefuehrt")
