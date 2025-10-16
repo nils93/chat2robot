@@ -18,9 +18,9 @@ class RAG_Functions:
     def chunking(self):
         #1. Chunker definieren
         splitter = RecursiveCharacterTextSplitter(
-            chunk_size=200,     # wie groß ein Chunk maximal sein darf
-            chunk_overlap=20,   # wie viel sich zwei Chunks überschneiden
-            separators=["\\item","\n", ".", " "]  # wo vorzugsweise getrennt werden soll
+            chunk_size=400,     # wie groß ein Chunk maximal sein darf
+            chunk_overlap=50,   # wie viel sich zwei Chunks überschneiden
+            separators=["\n", ".", " "]  # wo vorzugsweise getrennt werden soll
         )
         
         #2. Chunking ausführen
@@ -48,7 +48,7 @@ class RAG_Functions:
         user_vector = self.embeddings.embed_query(user_prompt)
 
         # 2 Ähnliche Chunks aus FAISS-Datenbank suchen
-        self.similar_vectors = self.VectorDatenbank.similarity_search_by_vector(user_vector, k=5)      #k=anzahl der naheliegensten Vektoren (höchste Kosinus-Similarity zum User-Prompt   )
+        self.similar_vectors = self.VectorDatenbank.similarity_search_by_vector(user_vector, k=6)      #k=anzahl der naheliegensten Vektoren (höchste Kosinus-Similarity zum User-Prompt   )
 
         # 3 Ausgabe oder Weitergabe ans LLM
         for i, doc in enumerate(self.similar_vectors):
