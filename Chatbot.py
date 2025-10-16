@@ -73,7 +73,7 @@ while True:
         break
     
     #Hinzufügren vom UserPrompt in die History
-    chat_history.append(HumanMessage(content=InputMessage))
+    chat_history.append(HumanMessage(content="Input Anwender: "+ InputMessage))
 
     #Teil von RAG: Vergleichen von Vektor des UserPromts und Vektoren im VectorStorage
     #4. Schauen, welche Vektoren im Vektorstore ähnlich sind (Ähnliche Richtung und Länge, bestimmung über cosine similarity)
@@ -83,7 +83,7 @@ while True:
     #Hinzufügren vom UserPrompt in die History
     #chat_history.append(BaseDataContentBlock(content=RAG_1.similar_vectors))
     similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
-    chat_history.append(HumanMessage(content=str(similar_content)))
+    chat_history.append(HumanMessage(content="RAG-Content: "+str(similar_content)))
 
     #aufrufen des LLMs->model.invoke heißt soviel wie model.aufrufen(...) 
     LLM_answer=model.invoke(chat_history)
