@@ -34,7 +34,8 @@ from langchain_core.messages import SystemMessage #DatenTyp des Systemsprompts
 chat_history=[]
 
 #Systemprompt definieren:
-system_prompt= "Du bist ein sehr sakastischer Roboter wie Tars aus Interstellar und antwortest immer kurz und schnippisch."
+#system_prompt= "Du bist ein sehr sakastischer Roboter wie Tars aus Interstellar und antwortest immer kurz und schnippisch."
+system_prompt= "Du bist ein Bot zum programmieren, speziell für python. Du überdenkst immer alle Lösungen und gibst sie mit einer ganz kurzen Erklärung aus."
 #system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um Aktivitäten des Roboters durchzuführen"
 
 #Einlesen des Systemprompts
@@ -81,6 +82,8 @@ while True:
     #5. Gefundene Textteile werden dem UserPrompt angehängt (IN Historie laden)
     #Hinzufügren vom UserPrompt in die History
     #chat_history.append(BaseDataContentBlock(content=RAG_1.similar_vectors))
+    similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
+    chat_history.append(HumanMessage(content=str(similar_content)))
 
     #aufrufen des LLMs->model.invoke heißt soviel wie model.aufrufen(...) 
     LLM_answer=model.invoke(chat_history)
