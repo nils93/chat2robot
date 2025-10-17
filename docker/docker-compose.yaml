@@ -7,7 +7,15 @@ services:
     container_name: ros2_turtlebot3_gpu
     privileged: true
     network_mode: host
-    command: /bin/bash
+    command: >
+      /bin/bash -c '
+        if [ -z "$$GOOGLE_API_KEY" ]; then
+          echo "GOOGLE_API_KEY is not set. Please pass it as an environment variable.";
+          exit 1;
+        else
+          echo "GOOGLE_API_KEY starts with: $${GOOGLE_API_KEY:0:5}...";
+          exec bash;
+        fi'
     tty: true
     ipc: host
     deploy:
@@ -27,6 +35,7 @@ services:
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: all
       NVIDIA_REQUIRE_CUDA: "cuda>=11.3"
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY}
 
 volumes:
   ros2_ws:

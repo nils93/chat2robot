@@ -88,7 +88,10 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 
 # Create ROS 2 workspace and setup sourcing
 RUN mkdir -p /home/$USERNAME/ros2_ws/src && \
-    echo "source /home/$USERNAME/ros2_ws/install/setup.bash" >> ~/.bashrc
+    echo 'if [ -f /home/'$USERNAME'/ros2_ws/install/setup.bash ]; then source /home/'$USERNAME'/ros2_ws/install/setup.bash; fi' >> /home/$USERNAME/.bashrc
+
+
+
 
 # Set workspace as default dir
 WORKDIR /home/$USERNAME/ros2_ws

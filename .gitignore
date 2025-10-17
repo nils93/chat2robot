@@ -229,13 +229,10 @@ cmake-build-*/
 
 # Gazebo / Simulation
 .gazebo/
-*.world
 *.model
 *.sdf
 *.config
 
-# RViz
-*.rviz
 
 # Catkin / Colcon Python stuff
 .colcon/
