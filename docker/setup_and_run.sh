@@ -10,11 +10,11 @@ sudo usermod -aG docker "$USER"
 
 # 2. Optionaler GPU-Support
 if [[ "$1" == "--gpu" ]]; then
-  echo "🔧 GPU-Modus aktiviert – prüfe containerd und Toolkit..."
+  echo "GPU-Modus aktiviert – prüfe containerd und Toolkit..."
 
   if dpkg -l | grep -q "^ii  containerd "; then
     echo "Dein System verwendet 'containerd' (durch docker.io)."
-    echo " NVIDIA Toolkit benötigt 'containerd.io', das kollidiert."
+    echo "NVIDIA Toolkit benötigt 'containerd.io', das kollidiert."
     echo "GPU-Unterstützung wird daher übersprungen."
   elif dpkg -l | grep -q "^ii  nvidia-container-toolkit "; then
     echo "NVIDIA Container Toolkit bereits installiert – wird übersprungen."
@@ -27,7 +27,7 @@ if [[ "$1" == "--gpu" ]]; then
       curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | \
         sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
     else
-      echo "🔑 NVIDIA-Keyring bereits vorhanden – wird übersprungen."
+      echo "NVIDIA-Keyring bereits vorhanden – wird übersprungen."
     fi
 
     curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
