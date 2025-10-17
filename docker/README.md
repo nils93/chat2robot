@@ -6,17 +6,15 @@
    ```bash
    cd docker
    ```
-
-2. **Baue das Image (bei Änderungen an Dockerfile oder docker-compose.yaml):**
+2. **Setze eine neue Umgebungsvariable:**
    ```bash
-   docker compose build
+   export GOOGLE_API_KEY="ABCDFEGH12345678"
+   source ~/.bashrc
    ```
-
-3. **Starte den Container:**
+3. **Führe das bash-Skript aus:**
    ```bash
-   docker compose up
+   ./setup_and_run.sh
    ```
-
 4. **Öffne eine Bash-Shell im laufenden Container:**
    ```bash
    docker exec -it ros2_turtlebot3_gpu bash
@@ -24,6 +22,15 @@
    *(Der Name `ros2_turtlebot3_gpu` steht in der `docker-compose.yaml` unter `container_name`.)*
 
 **Hinweise:**
+
+- **Image bauen:**
+   ```bash
+   docker compose build
+   ```
+- **Container starten:**
+   ```bash
+   docker compose up
+   ```
 - **Container stoppen:**  
   Drücke `Strg+C` im Terminal mit `docker compose up` oder führe aus:
   ```bash
