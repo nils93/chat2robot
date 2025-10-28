@@ -25,5 +25,5 @@
 #Aber warum ist es jetzt noch notwendig, ein RAG einzubinden?
 #    ->LLM ist extrem oberflächlich und kennt nur oberflächliche Daten. RAG bringt spezifische Daten in das Modell
 
-#->RAG wird nach der Einagbe des Userprompts eingesetzt, das sucht dann aus den Privaten Quellen sinnvolle Infos. Diese werden dann dem LLM 
+#->RAG wird nach der Einagbe des Userprompts eingesetzt, das sucht dann aus den Privaten Quellen sinnvolle Infos. Diese werden dann dem LLM übergeben
 
