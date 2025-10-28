@@ -11,14 +11,19 @@ os.environ["LANGCHAIN_TRACING"] = "false"  #wenn false: Anwendung läuft lokal, 
 
 #abfragen und einlesen des GooglE API-Keys 
 if not os.environ.get("GOOGLE_API_KEY"):
-  #os.environ["GOOGLE_API_KEY"] = "Hier API-Key eintragen!!!!!"
-  os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
+    #os.environ["GOOGLE_API_KEY"] = "Hier API-Key eintragen!!!!!"
+    os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
 
 #initialisieren des chatModels
 from langchain.chat_models import init_chat_model  #hier wird langchain importiert
 
-#jetzt: gemini initialisieren, hyperparameter "temperature" (Kreativität [0;1]) und "top_p" (Filter der WOrtwahl [0;1]) setzen
+#jetzt: gemini initialisieren, hyperparameter "temperature" (Kreativität [0;1]) und "top_p" (Filter der Wortwahl [0;1]) setzen
 model = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperature=0.7,top_p=0.8)  
+
+#->Hier das OrchestrierungsFramework einbinden:  ->Koordinieren Ablauf zwischen LLM und Tools, Lässt das LLM-Entscheiden welches Tool es verwenden muss
+# from langchain.agents import AgentExecutor, create_tool_calling_agent
+# from langchain_google_genai import ChatGoogleGenerativeAI
+
 
 #_______________Setup__________________________________________________________________________
 #LLM direk verwenden, ohne anpassungen
@@ -36,7 +41,7 @@ chat_history=[]
 #Systemprompt definieren:
 #system_prompt= "Du bist ein sehr sakastischer Roboter wie Tars aus Interstellar und antwortest immer kurz und schnippisch."
 system_prompt= "Du bist ein Bot zum programmieren, speziell für python. Du überdenkst immer alle Lösungen und gibst sie mit einer ganz kurzen Erklärung aus."
-#system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um Aktivitäten des Roboters durchzuführen"
+#system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um Aktivitäten des Roboters durchzuführen. Du sollst so lange beim User nachfragen, bis dir ein Position gegeben wird, die du anfahren kannst"
 
 #Einlesen des Systemprompts
 chat_history.append(SystemMessage(content=system_prompt))
@@ -94,3 +99,12 @@ while True:
     #Ausgabe
     print(f"\nLLM: {LLM_answer.content}")
     print(f"\nAnzahl Nachrichten in Historie: {len(chat_history)}")
+
+
+    #Tooling ()
+    #Was für ein Tool notwendig? Berechnung der Trajektorie? Oder Verarbeiten der Koordinaten und Publishen an Ros?
+    #Ausgeben der Koordinaten in einem ROS-Format!
+    #->Aufrufen einer Funktion durch das LLM (Mit Stichwort?) und übergeben der Koordinaten  im ROS-Format (ANgabe: kein hartgecodetes Tooling!)
+    #->Dann die geometry_msgs publishen
+    #from langchain_core.tools import tool und from pydantic import BaseModel, Field einbinden, um eigene Tools zu erstellen
+
