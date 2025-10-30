@@ -8,53 +8,44 @@ echo "Docker aktivieren..."
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
 
-# 2. Optionaler GPU-Support
-if [[ "$1" == "--gpu" ]]; then
-  echo "GPU-Modus aktiviert – prüfe containerd und Toolkit..."
+# 2. GPU automatisch erkennen
+if command -v nvidia-smi &> /dev/null && nvidia-smi -L &> /dev/null; then
+  echo "[Info] NVIDIA GPU erkannt – Toolkit wird geprüft/installiert."
 
-  if dpkg -l | grep -q "^ii  containerd "; then
-    echo "Dein System verwendet 'containerd' (durch docker.io)."
-    echo "NVIDIA Toolkit benötigt 'containerd.io', das kollidiert."
-    echo "GPU-Unterstützung wird daher übersprungen."
-  elif dpkg -l | grep -q "^ii  nvidia-container-toolkit "; then
-    echo "NVIDIA Container Toolkit bereits installiert – wird übersprungen."
-  else
-    echo "NVIDIA Toolkit wird installiert..."
-
+  if ! dpkg -l | grep -q "^ii  nvidia-container-toolkit "; then
+    echo "Installiere NVIDIA Container Toolkit..."
     distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
-
-    if [[ ! -f /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg ]]; then
-      curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | \
-        sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-    else
-      echo "NVIDIA-Keyring bereits vorhanden – wird übersprungen."
-    fi
-
+    curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | \
+      sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
     curl -s -L https://nvidia.github.io/libnvidia-container/$distribution/libnvidia-container.list | \
       sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#' | \
       sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list > /dev/null
-
     sudo apt update
     sudo apt install -y nvidia-container-toolkit
-    echo "NVIDIA Container Toolkit installiert."
+    sudo nvidia-ctk runtime configure --runtime=docker
     sudo systemctl restart docker
+  else
+    echo "[Info] NVIDIA Container Toolkit bereits installiert."
   fi
+
+  GPU_FLAG="--gpus all"
 else
-  echo "Kein GPU-Modus aktiviert – NVIDIA-Toolkit wird übersprungen."
+  echo "[Info] Keine GPU erkannt – starte im CPU-Modus."
+  GPU_FLAG=""
 fi
 
-# 3. GOOGLE_API_KEY abfragen
+# 3. GOOGLE_API_KEY abfragen (falls nicht gesetzt)
 if [[ -z "$GOOGLE_API_KEY" ]]; then
   read -rp "Bitte gib deinen GOOGLE_API_KEY ein: " key
   export GOOGLE_API_KEY="$key"
 fi
 
 # 4. Docker Compose Build
-echo "Baue Container-Image mit docker compose build..."
+echo "[Docker] Baue Container-Image..."
 docker compose build
 
-# 5. Container starten
-echo "Starte Container mit docker compose..."
-GOOGLE_API_KEY="$GOOGLE_API_KEY" docker compose up --detach
-echo "[Projektsetup] Installation abgeschlossen. Viel Erfolg!"
+# 5. Container starten (mit oder ohne GPU)
+echo "[Docker] Starte Container..."
+GOOGLE_API_KEY="$GOOGLE_API_KEY" docker compose up --detach $GPU_FLAG
 
+echo "[Projektsetup] Installation abgeschlossen. Viel Erfolg!"
