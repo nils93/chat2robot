@@ -49,3 +49,4 @@ echo "[Docker] Starte Container..."
 GOOGLE_API_KEY="$GOOGLE_API_KEY" docker compose up --detach $GPU_FLAG
 
 echo "[Projektsetup] Installation abgeschlossen. Viel Erfolg!"
+echo "Starte nun ein neues Terminal und führe den Befehl 'docker exec -it ros2_turtlebot3_gpu bash' aus, um in den Container zu gelangen."

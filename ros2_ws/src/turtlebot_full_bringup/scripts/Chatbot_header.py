@@ -1,8 +1,8 @@
 import numpy as np
 
-from langchain.text_splitter import RecursiveCharacterTextSplitter #Für das Chunking
-from langchain.embeddings import HuggingFaceEmbeddings #Für Embeddings
-from langchain.vectorstores import FAISS #Für Speichern der Vektoren
+from langchain_text_splitters import RecursiveCharacterTextSplitter     # Für das Chunking
+from langchain_huggingface import HuggingFaceEmbeddings                 # Für Embeddings
+from langchain_community.vectorstores import FAISS                      # Für FAISS-Vektorspeicher
 
 class RAG_Functions:
     def __init__(self):

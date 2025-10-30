@@ -76,12 +76,23 @@ RUN sudo apt update && sudo apt install -y \
 # ============================================================
 
 # Python and ROS tools
-RUN pip install --upgrade pip && \
-    pip install colcon-clean torch transformers protobuf
-    # === BEGIN: Eigene Python-Pakete ===
-    # Hier weitere pip Pakete einfügen, z.B.:
-    # \ numpy matplotlib 
-    # === END: Eigene Python-Pakete ===
+RUN pip install --no-cache-dir \
+    numpy==2.2.6 \
+    scipy==1.15.3 \
+    faiss-cpu==1.12.0 \
+    langchain==1.0.3 \
+    langchain-core==1.0.2 \
+    langchain-community==0.4.1 \
+    langchain-huggingface==1.0.0 \
+    langchain-text-splitters==1.0.0 \
+    sentence-transformers==5.1.2 \
+    transformers==4.41.2 \
+    huggingface-hub==0.36.0 \
+    tqdm==4.67.1 \
+    tenacity==9.1.2 \
+    google-ai-generativelanguage==0.9.0 \
+    langchain-google-genai==3.0.0
+# === END: Eigene Python-Pakete ===
     
 # Setup environment sourcing
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
