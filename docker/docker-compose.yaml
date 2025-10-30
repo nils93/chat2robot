@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   ros2:
     image: ros2-turtlebot3
