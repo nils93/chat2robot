@@ -48,11 +48,11 @@ chat_history.append(SystemMessage(content=system_prompt))
 
 
 
-#INstnazieren und einlesen der RAG-Informationen
+#Instanzieren und einlesen der RAG-Informationen
 RAG_1=RAG_Functions()   #hier Konstruktorfunktion aufrufen, daher die Klammer
 
 #Hier: Einbinden des RetrievalAugumentedGeneration-Modells
-#1. Dokumente Laden (Zuordnen von Festen Positionen (HomeBase, ...) zu Koordinaten)
+#1. Dokumente laden (Zuordnen von Festen Positionen (HomeBase, ...) zu Koordinaten)
     #->Siehe oberhalb der Main, da dies nicht in einem Loop gemacht werden muss
 RAG_1.text_input()
 
@@ -60,7 +60,7 @@ RAG_1.text_input()
     #->WIe macht es Sinn zu Zerteilen? ->Hier: in Sätzen!
 RAG_1.chunking() #ausführen der Chunking Funktion
 
-#2. Embeddings erstellen: Text aus UserPrompt und zusätzlochen Daten zu Vektoren
+#2. Embeddings erstellen: Text aus UserPrompt und zusätzlichen Daten zu Vektoren
 RAG_1.Embeddings()
 
 #3. VectorStore aufbauen ->Funktion nochmal selbst machen, hat Wöber extra in Angabe geschrieben
@@ -81,10 +81,10 @@ while True:
     chat_history.append(HumanMessage(content="Input Anwender: "+ InputMessage))
 
     #Teil von RAG: Vergleichen von Vektor des UserPromts und Vektoren im VectorStorage
-    #4. Schauen, welche Vektoren im Vektorstore ähnlich sind (Ähnliche Richtung und Länge, bestimmung über cosine similarity)
+    #4. Schauen, welche Vektoren im Vektorstore ähnlich sind (Ähnliche Richtung und Länge, Bestimmung über cosine similarity)
     RAG_1.query(InputMessage) #Hier UserPrompt oder Historie? Userpromt sinnvoller
     
-    #5. Gefundene Textteile werden dem UserPrompt angehängt (IN Historie laden)
+    #5. Gefundene Textteile werden dem UserPrompt angehängt (In Historie laden)
     #Hinzufügren vom UserPrompt in die History
     #chat_history.append(BaseDataContentBlock(content=RAG_1.similar_vectors))
     similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
@@ -107,4 +107,5 @@ while True:
     #->Aufrufen einer Funktion durch das LLM (Mit Stichwort?) und übergeben der Koordinaten  im ROS-Format (ANgabe: kein hartgecodetes Tooling!)
     #->Dann die geometry_msgs publishen
     #from langchain_core.tools import tool und from pydantic import BaseModel, Field einbinden, um eigene Tools zu erstellen
+
 
