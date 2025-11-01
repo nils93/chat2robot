@@ -72,3 +72,21 @@ damit die Antworten relevanter und domänenspezifischer werden.
 2. RAG sucht in privaten Quellen nach passenden Informationen  
 3. Diese Daten werden dem LLM als Kontext übergeben  
 4. LLM generiert daraufhin die endgültige Antwort
+
+
+## Ausführung ROS/Turtlebot
+
+1. startskript ausführbar machen:
+   ```bash
+   chmod +x src/turtlebot_full_bringup/start_robot.sh
+   ```
+
+2. startsktipr starten:
+   ```bash
+   ./src/turtlebot_full_bringup/start_robot.sh
+   ```
+
+Das Skript:
+- launcht GAZEBO, RViZ gemäß launchdatei 
+- wartet 5 Sekunden,
+- setzt anschließend automatisch die Initialpose (`/initialpose`).
