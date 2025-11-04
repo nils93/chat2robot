@@ -45,8 +45,10 @@ chat_history=[]
 
 #Systemprompt definieren:
 #system_prompt= "Du bist ein sehr sakastischer Roboter wie Tars aus Interstellar und antwortest immer kurz und schnippisch."
-system_prompt= "Du bist ein Bot zum programmieren, speziell für python. Du überdenkst immer alle Lösungen und gibst sie mit einer ganz kurzen Erklärung aus."
-#system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um Aktivitäten des Roboters durchzuführen. Du sollst so lange beim User nachfragen, bis dir ein Position gegeben wird, die du anfahren kannst"
+#system_prompt= "Du bist ein Bot zum programmieren, speziell für python. Du überdenkst immer alle Lösungen und gibst sie mit einer ganz kurzen Erklärung aus."
+system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um den Roboter an eine in x und y angegeben Position zu fahren. Du sollst so lange beim User nachfragen, bis dir ein Position gegeben wird, die du anfahren kannst."
+
+
 
 #Einlesen des Systemprompts
 #chat_history.append(SystemMessage(content=system_prompt))
@@ -108,23 +110,23 @@ while True:
     chat_history.append(HumanMessage(content="RAG-Content: "+str(similar_content)))
 
     #tools implementieren
-    tools=[rechner]     #->Tools können nur mithilfe eines Orchestrierungsframeworks eingesetzt werden, daher jetzt LangChain verwenden!
+    LLM_tools=[rechner, ROS_cmd_vel]     #->Tools können nur mithilfe eines Orchestrierungsframeworks eingesetzt werden, daher jetzt LangChain verwenden!
 
     #aufrufen des LLMs->LLM.invoke heißt soviel wie LLM.aufrufen(...) 
     #LLM_answer=LLM.invoke(chat_history)    #->Das jetzt in LLM-Agent implementieren, worin auch die Tools implementiert werden (siehe folgende Zeilen)
 
     #hier LLM-Agent anlegen, welcher zugriff auf LLM, tools und historie hat
-    LLM_agent=create_tool_calling_agent(LLM, tools, full_prompt)   #->Hier anlegen des "Gehirns", welches im executor zum "denken" verwendet wird
+    LLM_agent= create_tool_calling_agent(LLM, LLM_tools, full_prompt)   #->Hier anlegen des "Gehirns", welches im executor zum "denken" verwendet wird
 
     #LLM-agent_executor ->Managed den Prozess (denken->tool aufrufen->ergebniss verarbeiten->weiterdenken) 
     LLM_agent_executor = AgentExecutor(
         agent=LLM_agent,
-        tools=tools,
+        tools=LLM_tools,
         verbose=True,   # Zeigt den Denkprozess des Agenten
         handle_parsing_errors=True
     )
     
-    #Jetzt wieder alle Infos dem LLM bzw jetzt dem LLM-Agent übergeben
+    #Jetzt wieder alle Infos dem LLM bzw jetzt dem LLM-Agent übergeben und die Antwort in eine Variable schreiben
     LLM_answer=LLM_agent_executor.invoke({"input": InputMessage, "chat_history_LLM": chat_history})
     
     #Abspeichern der Antwort und anhängen an die Historie
