@@ -108,3 +108,7 @@ while True:
     #->Dann die geometry_msgs publishen
     #from langchain_core.tools import tool und from pydantic import BaseModel, Field einbinden, um eigene Tools zu erstellen
 
+
+
+    #Nächster Schritt: Hier LangChain-Vorgehen zum einbinden der Tools->https://python.langchain.com/docs/concepts/tool_calling/
+
