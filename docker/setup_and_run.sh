@@ -1,19 +1,20 @@
 #!/bin/bash
-set -e  # stop on first real error
+set -e
 
 echo "[Projektsetup] Starte Installation für Ubuntu 22.04..."
 
 # 1. Docker aktivieren
-echo "Docker aktivieren..."
+echo "[Setup] Docker aktivieren..."
 sudo systemctl enable --now docker
 sudo usermod -aG docker "$USER"
 
-# 2. GPU automatisch erkennen
+# 2. GPU erkennen
+USE_GPU=false
 if command -v nvidia-smi &> /dev/null && nvidia-smi -L &> /dev/null; then
-  echo "[Info] NVIDIA GPU erkannt – Toolkit wird geprüft/installiert."
+  echo "[Info] NVIDIA GPU erkannt."
 
   if ! dpkg -l | grep -q "^ii  nvidia-container-toolkit "; then
-    echo "Installiere NVIDIA Container Toolkit..."
+    echo "[Setup] Installiere NVIDIA Container Toolkit..."
     distribution=$(. /etc/os-release; echo $ID$VERSION_ID)
     curl -s -L https://nvidia.github.io/libnvidia-container/gpgkey | \
       sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
@@ -24,29 +25,31 @@ if command -v nvidia-smi &> /dev/null && nvidia-smi -L &> /dev/null; then
     sudo apt install -y nvidia-container-toolkit
     sudo nvidia-ctk runtime configure --runtime=docker
     sudo systemctl restart docker
-  else
-    echo "[Info] NVIDIA Container Toolkit bereits installiert."
   fi
 
-  GPU_FLAG="--gpus all"
+  USE_GPU=true
 else
-  echo "[Info] Keine GPU erkannt – starte im CPU-Modus."
-  GPU_FLAG=""
+  echo "[Info] Keine GPU erkannt – CPU-Modus."
 fi
 
-# 3. GOOGLE_API_KEY abfragen (falls nicht gesetzt)
+# 3. GOOGLE_API_KEY abfragen
 if [[ -z "$GOOGLE_API_KEY" ]]; then
   read -rp "Bitte gib deinen GOOGLE_API_KEY ein: " key
   export GOOGLE_API_KEY="$key"
 fi
 
-# 4. Docker Compose Build
-echo "[Docker] Baue Container-Image..."
+# 4. Build
+echo "[Docker] Baue Image..."
 docker compose build
 
-# 5. Container starten (mit oder ohne GPU)
+# 5. Start
 echo "[Docker] Starte Container..."
-GOOGLE_API_KEY="$GOOGLE_API_KEY" docker compose up --detach $GPU_FLAG
+if [ "$USE_GPU" = true ]; then
+  docker compose --profile gpu up -d
+else
+  docker compose up -d
+fi
 
-echo "[Projektsetup] Installation abgeschlossen. Viel Erfolg!"
-echo "Starte nun ein neues Terminal und führe den Befehl 'docker exec -it ros2_turtlebot3_gpu bash' aus, um in den Container zu gelangen."
+echo "[Fertig] Setup abgeschlossen."
+echo "Container betreten mit:"
+echo "  docker exec -it ros2_turtlebot3 bash"
