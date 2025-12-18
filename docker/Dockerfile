@@ -77,7 +77,7 @@ RUN sudo apt update && sudo apt install -y \
 
 # Python and ROS tools
 RUN pip install --upgrade pip && \
-    pip install colcon-clean torch transformers protobuf
+    pip install colcon-clean
     # === BEGIN: Eigene Python-Pakete ===
     # Hier weitere pip Pakete einfügen, z.B.:
     # \ numpy matplotlib 
