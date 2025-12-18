@@ -19,7 +19,8 @@ def generate_launch_description():
 
     # Define paths
     world_file = os.path.join(pkg_bringup, 'worlds', 'playground.world')
-
+    map_dir = os.path.join(pkg_bringup, 'maps', 'playground_map_hq.yaml')
+    
     # Gazebo Launch
     gazebo_pkg = FindPackageShare('gazebo_ros').find('gazebo_ros')
     gazebo_launch = os.path.join(gazebo_pkg, 'launch')
@@ -96,5 +97,6 @@ def generate_launch_description():
         gzclient,
         spawn_turtlebot_cmd,
         robot_state_publisher_cmd,
+        nav2_launch
         ]
     )

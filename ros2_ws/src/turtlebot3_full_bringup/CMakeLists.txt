@@ -37,7 +37,6 @@ install(DIRECTORY
   launch
   maps
   rviz
-  scripts
   test
   turtlebot3_full_bringup
   worlds
