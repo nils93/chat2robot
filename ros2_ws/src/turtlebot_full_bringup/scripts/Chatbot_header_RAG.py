@@ -4,6 +4,9 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter     # Für d
 from langchain_huggingface import HuggingFaceEmbeddings                 # Für Embeddings
 from langchain_community.vectorstores import FAISS                      # Für FAISS-Vektorspeicher
 
+
+from langchain_core.tools   import tool #damit einfache Tools erstellen, auf welche das LLM zugreifen kann
+
 class RAG_Functions:
     def __init__(self):
         pass
