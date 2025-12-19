@@ -19,21 +19,20 @@ def generate_launch_description():
 
     # Define paths
     world_file = os.path.join(pkg_bringup, 'worlds', 'playground.world')
-
+    map_dir = os.path.join(pkg_bringup, 'maps', 'playground_map_hq.yaml')
+    
     # Gazebo Launch
     gazebo_pkg = FindPackageShare('gazebo_ros').find('gazebo_ros')
     gazebo_launch = os.path.join(gazebo_pkg, 'launch')
 
     # Nav2 Launch
-    nav2_pkg = FindPackageShare('turtlebot3_navigation2').find('turtlebot3_navigation2')
-    nav2_param = os.path.join(nav2_pkg, 'param')
+    init_nav2_params = os.path.join(pkg_bringup, 'config', 'init_nav2_params.yaml')
+    nav2_bringup_pkg = FindPackageShare('nav2_bringup').find('nav2_bringup')
+    nav2_bringup_launch = os.path.join(nav2_bringup_pkg, 'launch')
 
     # RViz Config
     rviz_config_dir = os.path.join(pkg_bringup, 'rviz', 'rviz.rviz')
-    #rviz_config_dir = os.path.join(
-    #    nav2_pkg,
-    #    'rviz',
-    #    'tb3_navigation2.rviz')
+
     
     # Robot State Publisher
     robostate_package = FindPackageShare('turtlebot3_gazebo').find('turtlebot3_gazebo')
@@ -45,24 +44,8 @@ def generate_launch_description():
     )
 
     x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='-0.5')
-    
-    # Parameters
-    param_file_name = TURTLEBOT3_MODEL + '.yaml'
-    if ROS_DISTRO == 'humble':
-        param_dir = LaunchConfiguration(
-            'params_file',
-            default=os.path.join(
-                nav2_param,
-                ROS_DISTRO,
-                param_file_name))
-    else:
-        param_dir = LaunchConfiguration(
-            'params_file',
-            default=os.path.join(
-                nav2_param,
-                param_file_name))
-    # NODES
+    y_pose = LaunchConfiguration('y_pose', default='-0.5')  
+
     # Gazebo server
     gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -88,6 +71,14 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time}.items(),
     )
     
+    nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([nav2_bringup_launch, '/bringup_launch.py']),
+        launch_arguments={
+            'map': map_dir,
+            'use_sim_time': use_sim_time,
+            'params_file': init_nav2_params,
+        }.items(),
+    )
 
     rviz = Node(
         package='rviz2',
@@ -106,5 +97,6 @@ def generate_launch_description():
         gzclient,
         spawn_turtlebot_cmd,
         robot_state_publisher_cmd,
+        nav2_launch
         ]
     )
