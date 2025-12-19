@@ -19,14 +19,20 @@ def generate_launch_description():
     
     # Define paths
     world_file = os.path.join(pkg_bringup, 'worlds', 'playground.world')
+<<<<<<< HEAD:ros2_ws/src/turtlebot_full_bringup/launch/full_bringup.launch.py
     default_map = os.path.join(pkg_bringup, 'maps', 'playground_map_hq.yaml')
     nav2_param = os.path.join(nav2_pkg, 'param')
     rviz_config_dir = os.path.join(pkg_bringup, 'rviz', 'rviz.rviz')
 
+=======
+    map_dir = os.path.join(pkg_bringup, 'maps', 'playground_map_hq.yaml')
+    
+>>>>>>> origin/master:ros2_ws/src/turtlebot3_full_bringup/launch/full_bringup.launch.py
     # Gazebo Launch
     gazebo_pkg = FindPackageShare('gazebo_ros').find('gazebo_ros')
     gazebo_launch = os.path.join(gazebo_pkg, 'launch')
 
+<<<<<<< HEAD:ros2_ws/src/turtlebot_full_bringup/launch/full_bringup.launch.py
     # Parameters
     param_file_name = TURTLEBOT3_MODEL + '.yaml'
 
@@ -49,6 +55,16 @@ def generate_launch_description():
         'slam': 'False'
     }.items()
 )
+=======
+    # Nav2 Launch
+    init_nav2_params = os.path.join(pkg_bringup, 'config', 'init_nav2_params.yaml')
+    nav2_bringup_pkg = FindPackageShare('nav2_bringup').find('nav2_bringup')
+    nav2_bringup_launch = os.path.join(nav2_bringup_pkg, 'launch')
+
+    # RViz Config
+    rviz_config_dir = os.path.join(pkg_bringup, 'rviz', 'rviz.rviz')
+
+>>>>>>> origin/master:ros2_ws/src/turtlebot3_full_bringup/launch/full_bringup.launch.py
     
     # Robot State Publisher
     robostate_package = FindPackageShare('turtlebot3_gazebo').find('turtlebot3_gazebo')
@@ -59,11 +75,17 @@ def generate_launch_description():
         robostate_package, 'launch', 'spawn_turtlebot3.launch.py'
     )
 
+<<<<<<< HEAD:ros2_ws/src/turtlebot_full_bringup/launch/full_bringup.launch.py
     x_pose = LaunchConfiguration('x_pose', default='0.0')
     y_pose = LaunchConfiguration('y_pose', default='0.0')
     
         
     # NODES
+=======
+    x_pose = LaunchConfiguration('x_pose', default='-2.0')
+    y_pose = LaunchConfiguration('y_pose', default='-0.5')  
+
+>>>>>>> origin/master:ros2_ws/src/turtlebot3_full_bringup/launch/full_bringup.launch.py
     # Gazebo server
     gzserver = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -87,7 +109,20 @@ def generate_launch_description():
     robot_state_publisher_cmd = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(robostate_launch),
         launch_arguments={'use_sim_time': use_sim_time}.items(),
+<<<<<<< HEAD:ros2_ws/src/turtlebot_full_bringup/launch/full_bringup.launch.py
     )    
+=======
+    )
+    
+    nav2_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([nav2_bringup_launch, '/bringup_launch.py']),
+        launch_arguments={
+            'map': map_dir,
+            'use_sim_time': use_sim_time,
+            'params_file': init_nav2_params,
+        }.items(),
+    )
+>>>>>>> origin/master:ros2_ws/src/turtlebot3_full_bringup/launch/full_bringup.launch.py
 
     rviz = Node(
         package='rviz2',
@@ -106,6 +141,10 @@ def generate_launch_description():
         gzclient,
         spawn_turtlebot_cmd,
         robot_state_publisher_cmd,
+<<<<<<< HEAD:ros2_ws/src/turtlebot_full_bringup/launch/full_bringup.launch.py
         nav2_bringup,
+=======
+        nav2_launch
+>>>>>>> origin/master:ros2_ws/src/turtlebot3_full_bringup/launch/full_bringup.launch.py
         ]
     )
