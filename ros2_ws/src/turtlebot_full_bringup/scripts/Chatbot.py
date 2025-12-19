@@ -4,16 +4,6 @@ import getpass
 from Chatbot_header_RAG import*
 from Chatbot_header_tools import*
 
-from langchain_core.messages import HumanMessage #datentyp Input der anwendenden Person->UserPrompt
-from langchain_core.messages import AIMessage #datentyp Antwort der AI
-from langchain_core.messages import SystemMessage #DatenTyp des Systemsprompts
-from langchain_core.prompts import ChatPromptTemplate #notwendig, da dem Agent keine normale Liste mehr übergeben werden kann, sonder es muss ein "ChatPromptTemplate" sein
-
-from langchain.chat_models import init_chat_model  #hier wird langchain importiert
-from langchain.agents import create_tool_calling_agent, AgentExecutor   #hier wird das Orchestrierungsframework eingebunden, welches für dein Einsatz der Tools notwendig ist
-
-
-
 #_____________Initialisieren des LLM______________________________________________________________________
 #abfragen und einlesen des LangChai API-Keys
 os.environ["LANGCHAIN_TRACING"] = "false"  #wenn false: Anwendung läuft lokal, nichts wird an Langsmith gesendet
@@ -27,7 +17,9 @@ if not os.environ.get("GOOGLE_API_KEY"):
 
 #initialisieren des chatModels
 from langchain.chat_models import init_chat_model  #hier wird langchain importiert
-from langchain.agents import create_tool_calling_agent, AgentExecutor   #hier wird das Orchestrierungsframework eingebunden, welches für dein Einsatz der Tools notwendig ist
+#from langchain.agents import create_tool_calling_agent, AgentExecutor   #hier wird das Orchestrierungsframework eingebunden, welches für dein Einsatz der Tools notwendig ist
+
+from langchain_classic.agents import create_tool_calling_agent, AgentExecutor      #neue Version des "langchain-agents import create_tool_calling_agent in zeile 20"
 
 #jetzt: gemini initialisieren, hyperparameter "temperature" (Kreativität [0;1]) und "top_p" (Filter der Wortwahl [0;1]) setzen
 LLM = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperature=0.7,top_p=0.8)  
@@ -40,6 +32,11 @@ LLM = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperat
 #_______________Setup__________________________________________________________________________
 #LLM direk verwenden, ohne anpassungen
 #Übergeben der kompletten Chatbot Historie (kompletter Prompt)
+
+from langchain_core.messages import HumanMessage #datentyp Input der anwendenden Person->UserPrompt
+from langchain_core.messages import AIMessage #datentyp Antwort der AI
+from langchain_core.messages import SystemMessage #DatenTyp des Systemsprompts
+from langchain_core.prompts import ChatPromptTemplate #notwendig, da dem Agent keine normale Liste mehr übergeben werden kann, sonder es muss ein "ChatPromptTemplate" sein
 
 
 #from langchain_core.messages import BaseDataContentBlock #DatenTyp des Systemsprompts
@@ -130,6 +127,7 @@ while True:
         verbose=True,   # Zeigt den Denkprozess des Agenten
         handle_parsing_errors=True
     )
+
     
     #Jetzt wieder alle Infos dem LLM bzw jetzt dem LLM-Agent übergeben und die Antwort in eine Variable schreiben
     LLM_answer=LLM_agent_executor.invoke({"input": InputMessage, "chat_history_LLM": chat_history})
@@ -148,4 +146,4 @@ while True:
     #->Aufrufen einer Funktion durch das LLM (Mit Stichwort?) und übergeben der Koordinaten  im ROS-Format (ANgabe: kein hartgecodetes Tooling!)
     #->Dann die geometry_msgs publishen
     #from langchain_core.tools import tool und from pydantic import BaseModel, Field einbinden, um eigene Tools zu erstellen
-
+	#test123
