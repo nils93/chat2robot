@@ -28,11 +28,6 @@ services:
       QT_X11_NO_MITSHM: 1
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
 
-  ros2-gpu:
-    extends: ros2
-    container_name: ros2_turtlebot3_gpu
-    profiles: ["gpu"]
-    runtime: nvidia
-    environment:
-      NVIDIA_VISIBLE_DEVICES: all
-      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+volumes:
+  ros2_ws:
+    driver: local
