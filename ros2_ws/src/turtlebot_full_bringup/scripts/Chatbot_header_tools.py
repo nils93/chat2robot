@@ -41,9 +41,9 @@ def ROS_cmd_vel(x: int, y: int, operation: str)->int:
         return "Unbekannte Operation"
 
 
-Weiteres Vorgehen:
-->Pose als "/goal_pose" an das Topic Nav2 schicken (dafür nav 2 und turtlebot3 gazebo installieren)
-->Map reinladen und schauen ob simulation funktioniert
-->Launchfile schreiben, in dem die trutlebot in simulation gespawnt und die nav2_navigation gestartet wird
-->Dann Simulation starten
-->Dann code bzw funktion schreiben, welche vom LLM-Tool cmd_vel:publisher aufgerufen wird und die Koordinaten als goal pose published
+# Weiteres Vorgehen:
+# ->Pose als "/goal_pose" an das Topic Nav2 schicken (dafür nav 2 und turtlebot3 gazebo installieren)
+# ->Map reinladen und schauen ob simulation funktioniert
+# ->Launchfile schreiben, in dem die trutlebot in simulation gespawnt und die nav2_navigation gestartet wird
+# ->Dann Simulation starten
+# ->Dann code bzw funktion schreiben, welche vom LLM-Tool cmd_vel:publisher aufgerufen wird und die Koordinaten als goal pose published
