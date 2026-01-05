@@ -7,3 +7,7 @@
 #Ihre Empfehlung f¨ur industrielle Nutzung. W¨are ein Chatbot zur Steuerung eines Industrieroboters aus Ihrer Sicht empfehlenswert? Was w¨aren die Vorteile/Nachteile.
 
 #(optional, empfohlen) Die Auswirkung von unterschiedlichen LLM.
+
+
+
+#-> in src-folder: turtlebot3_full_bringup is without ROS-interface, turtlebot_full_bringup (without the 3) is with an ROS-interface
