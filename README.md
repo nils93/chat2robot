@@ -10,4 +10,4 @@
 
 
 
-#-> in src-folder: turtlebot3_full_bringup is without ROS-interface, turtlebot_full_bringup (without the 3) is with an ROS-interface
+#-> in src-folder: turtlebot_full_bringup is without ROS-interface, turtlebot3_full_bringup (with the 3) is with an ROS-interface &an GUI
