@@ -33,10 +33,10 @@ install(TARGETS
 
 # === INSTALL NON-C++ ASSETS ===
 install(DIRECTORY
+  config
   launch
   maps
   rviz
-  scripts
   test
   turtlebot3_full_bringup
   worlds
