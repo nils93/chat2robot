@@ -1,0 +1,20 @@
+Home:
+  x: 2.0
+  y: 3.0
+  theta: 0.0
+
+Pose A:
+  x: 3.0
+  y: 8.0
+  theta: 0.0
+
+Pose B:
+  x: 5.0
+  y: 3.0
+  theta: 0.0
+
+Ziel:
+  x: 2.5
+  y: 5.0
+  theta: 0.0
+
