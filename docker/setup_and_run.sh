@@ -34,7 +34,8 @@ fi
 
 # 3. GOOGLE_API_KEY abfragen
 if [[ -z "$GOOGLE_API_KEY" ]]; then
-  read -rp "Bitte gib deinen GOOGLE_API_KEY ein: " key
+  read -rsp "Bitte gib deinen GOOGLE_API_KEY ein: " key
+  echo
   export GOOGLE_API_KEY="$key"
 fi
 

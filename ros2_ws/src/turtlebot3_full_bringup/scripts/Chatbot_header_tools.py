@@ -23,7 +23,7 @@ def rechner(a: int, b: int, operation: str) -> int:
         return "Unbekannte Operation"
     
 
-@tool   #wandelt normale Pyhton FUnktion in Tool um, welches vom LLM-Agent verwendet werden kann
+@tool   #wandelt normale Python Funktion in Tool um, welches vom LLM-Agent verwendet werden kann
 def ROS_cmd_vel(x: int, y: int, operation: str)->int:
     """Wandelt die x,y Koordinaten in ein bestimmtes Datenformat um und published es auf ein ROS-Topic. 
     
