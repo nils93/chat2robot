@@ -11,7 +11,7 @@ from langchain_mistralai import ChatMistralAI
 
 #eigene Module
 from Chatbot_header_RAG import RAG_Functions
-from Chatbot_header_tools import rechner, ROS_cmd_vel
+from ROS_tools import ROS_send_goal, rechner
 
 
 def select_llm():
@@ -85,7 +85,7 @@ RAG_1.VectorStorage() #VectorStore aufbauen ->Funktion nochmal selbst machen, ha
 
 
 #Tools einbinden
-tools=[rechner, ROS_cmd_vel]
+tools=[rechner, ROS_send_goal]
 
 # Agent anlegen (gehirn/grundfunktionen)
 LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt) 
