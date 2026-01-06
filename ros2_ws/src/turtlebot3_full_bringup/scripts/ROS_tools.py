@@ -1,11 +1,15 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
+#ROS2
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
+
 import math
 import threading
+
+
 class GoalInput(BaseModel):
     x: float = Field(description="X position in map frame")
     y: float = Field(description="Y position in map frame")
@@ -42,11 +46,13 @@ def ROS_send_goal(x: float, y: float, theta: float) -> str:
 
     msg.pose.position.x = x
     msg.pose.position.y = y
+    msg.pose.position.z = 0.0
 
     msg.pose.orientation.z = math.sin(theta / 2.0)
     msg.pose.orientation.w = math.cos(theta / 2.0)
 
     ros_node.publisher.publish(msg)
+    ros_node.get_logger().info(f"Goal published: x={x}, y={y}, theha={theta}")
 
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
 
