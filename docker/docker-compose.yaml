@@ -12,10 +12,13 @@ services:
 
     command: >
       /bin/bash -c '
-        if [ -z "$$GOOGLE_API_KEY" ]; then
-          echo "GOOGLE_API_KEY is not set.";
+        if [ -z "$$GOOGLE_API_KEY" ] && [ -z "$$MISTRAL_API_KEY" ]; then
+          echo "Fehler: Weder GOOGLE_API_KEY noch MISTRAL_API_KEY gesetzt!";
           exit 1;
         fi;
+        echo "Verfügbare LLM APIs:";
+        [ -n "$$GOOGLE_API_KEY" ] && echo "  - Google Gemini ✓";
+        [ -n "$$MISTRAL_API_KEY" ] && echo "  - Mistral ✓";
         exec bash;
       '
 
@@ -27,6 +30,7 @@ services:
       DISPLAY: $DISPLAY
       QT_X11_NO_MITSHM: 1
       GOOGLE_API_KEY: ${GOOGLE_API_KEY}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
 
 volumes:
   ros2_ws:

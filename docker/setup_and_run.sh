@@ -32,11 +32,22 @@ else
   echo "[Info] Keine GPU erkannt – CPU-Modus."
 fi
 
-# 3. GOOGLE_API_KEY abfragen
+# 3. API_KEYs abfragen
+
+echo ""
+echo "[API Keys: Mindestens einen Key angeben (Enter = Überspringen)"
+
+#GOOGLE_API_KEY abfragen
 if [[ -z "$GOOGLE_API_KEY" ]]; then
-  read -rsp "Bitte gib deinen GOOGLE_API_KEY ein: " key
+  read -rsp "Bitte gib deinen GOOGLE_API_KEY ein: " google_key
   echo
-  export GOOGLE_API_KEY="$key"
+  export GOOGLE_API_KEY="$google_key"
+fi
+
+if [[ -z "$MISTRAL_API_KEY" ]]; then
+  read -rsp "Bitte gib deinen MISTRAL_API_KEY ein: " mistral_key
+  echo
+  export MISTRAL_API_KEY="$mistral_key"
 fi
 
 # 4. Build
