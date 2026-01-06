@@ -57,7 +57,7 @@ LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt)
 LLM_agent_executor = AgentExecutor(
     agent=LLM_agent,
     tools=tools,
-    verbose=True,   # Zeigt den Denkprozess des Agenten
+    verbose=True,   # True: Zeigt den Denkprozess des Agenten
     handle_parsing_errors=True
     )
 
@@ -84,7 +84,9 @@ def main():
         
         #Abspeichern der Antwort und anhängen an die Historie
         chat_history.append(AIMessage(content=LLM_answer["output"]))
-        
+
+        output_str = RAG_1.LLM_OutputAsListToStr(LLM_answer["output"])
+        print(f"Chatbot: {output_str}")
         
         print(f"\nAnzahl Nachrichten in Historie: {len(chat_history)}")
 

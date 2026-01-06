@@ -14,9 +14,6 @@ class RAG_Functions:
     def text_input(self):
         with open("Angabe.tex", "r", encoding="utf-8") as f:
           self.imported_text = f.read()     #einlesen des .tex files
-
-          #print(imported_text[:500])
-
     
     def chunking(self):
         #1. Chunker definieren
@@ -54,7 +51,13 @@ class RAG_Functions:
         self.similar_vectors = self.VectorDatenbank.similarity_search_by_vector(user_vector, k=6)      #k=anzahl der naheliegensten Vektoren (höchste Kosinus-Similarity zum User-Prompt   )
 
         # 3 Ausgabe oder Weitergabe ans LLM
-        for i, doc in enumerate(self.similar_vectors):
-            print(f"Treffer {i+1}: {doc.page_content[:400]}")
+        #for i, doc in enumerate(self.similar_vectors):
+        #    print(f"Treffer {i+1}: {doc.page_content[:400]}")
         
         print("-> 4. Vergleich UserPromt mit VectorStorage durchgefuehrt")
+    
+    def LLM_OutputAsListToStr(self, output):
+        if isinstance(output, list):
+            return output[0]["text"]
+        return output
+    
