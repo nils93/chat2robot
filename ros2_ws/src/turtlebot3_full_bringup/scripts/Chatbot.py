@@ -7,29 +7,60 @@ from langchain_core.messages import HumanMessage #datentyp Input der anwendenden
 from langchain_core.messages import AIMessage #datentyp Antwort der AI
 from langchain_core.messages import SystemMessage #DatenTyp des Systemsprompts
 from langchain_core.prompts import ChatPromptTemplate #notwendig, da dem Agent keine normale Liste mehr übergeben werden kann, sonder es muss ein "ChatPromptTemplate" sein
+from langchain_mistralai import ChatMistralAI
 
 #eigene Module
 from Chatbot_header_RAG import RAG_Functions
 from Chatbot_header_tools import rechner, ROS_cmd_vel
 
+
+def select_llm():
+
+    print("====  Choose LLM  ====")
+    print("  1) MISTRAL (mistral-small-latest)")
+    print("  2) Google Gemini (gemini-2.5-flash)")
+    choice_LLM = input("Choose: [1/2]: ").strip()
+
+    if choice_LLM == "1":
+        print("MISTRAL ausgewählt")
+
+        if not os.environ.get("MISTRAL_API_KEY"):
+            os.environ["MISTRAL_API_KEY"] = getpass.getpass("Enter API key for MISTRAL: ")
+
+        return ChatMistralAI(
+            model="mistral-small-latest",
+            temperature=0.4,
+            top_p=0.8
+        )
+    
+    elif choice_LLM == "2":
+        print("GOOGLE GEMINI ausgewählt")
+
+        if not os.environ.get("GOOGLE_API_KEY"):
+            os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
+
+        return init_chat_model("gemini-2.5-flash",
+            model_provider="google_genai",
+            temperature=0.5,
+            top_p=0.8
+        )
+    
+    else:
+        print("Invalid input. Accepting only [1] or [2]")
+
+
 # Abfragen und einlesen des LangChai API-Keys
 os.environ["LANGCHAIN_TRACING"] = "false"  #wenn false: Anwendung läuft lokal, nichts wird an Langsmith gesendet
 
-# Abfragen und einlesen des GooglE API-Keys 
-if not os.environ.get("GOOGLE_API_KEY"):
-    os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
-
 # Initialisieren des LLM
-LLM = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperature=0.5,top_p=0.8)
-
+LLM = select_llm()
 # Liste für Historie anlegen
 chat_history=[]
 
 
 # Systemprompt
 system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
-    "Deine Wissensbasis ist der Inhalt der per RAG hinterlegten Dokumente:\n\n" \
-    "{rag_context}\n\n" \
+    "Deine Wissensbasis ist der Inhalt der per RAG hinterlegten Dokumente.\n\n" \
     "VORGEHEN:\n" \
     "1) Identifiziere aus dem User-Prompt ein oder mehrere Ziele. Stelle Rückfragen, bis du mindestens ein Ziel eindeutig identifizieren kannst.\n" \
     "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis.\n" \
