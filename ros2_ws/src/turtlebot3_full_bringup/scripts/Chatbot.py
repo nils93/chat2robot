@@ -20,15 +20,21 @@ if not os.environ.get("GOOGLE_API_KEY"):
     os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
 
 # Initialisieren des LLM
-LLM = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperature=0.7,top_p=0.8)
+LLM = init_chat_model("gemini-2.5-flash", model_provider="google_genai",temperature=0.5,top_p=0.8)
 
 # Liste für Historie anlegen
 chat_history=[]
 
 
 # Systemprompt
-system_prompt= "Du bist des Gehirn eines Mobilen Roboters. Du erkennst verschiendene Sprachen (unter anderem auch den Österreichischen Dialekt) und du sollst aus einem Tooling Pool das Richtige Tool auswählen, um den Roboter an eine in x und y angegeben Position zu fahren. Du sollst so lange beim User nachfragen, bis dir ein Position gegeben wird, die du anfahren kannst."
-
+system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
+    "Deine Wissensbasis ist der Inhalt der per RAG hinterlegten Dokumente:\n\n" \
+    "{rag_context}\n\n" \
+    "VORGEHEN:\n" \
+    "1) Identifiziere aus dem User-Prompt ein oder mehrere Ziele. Stelle Rückfragen, bis du mindestens ein Ziel eindeutig identifizieren kannst.\n" \
+    "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis.\n" \
+    "3) Rufe für jedes Ziel ROS_send_goal(x, y, theta) auf. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
+    "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
 full_prompt = ChatPromptTemplate.from_messages([
