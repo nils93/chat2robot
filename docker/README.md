@@ -1,14 +1,9 @@
 # ROS2 TurtleBot3 – Docker Setup via Skript
 ## Unter Ubuntu
    ```bash
-   cd ~/chat2robot/docker
-   ./setup_and_run.sh
-   ```
+   cd chat2robot/docker
+   ./setup_and_run.sh   //nur für 22.04 (?) 
 
-## Unter MacOS
-   ```bash
-   cd ~/chat2robot/docker
-   ./setup_and_run_mac.sh
    ```
 
 # ROS2 TurtleBot3 -  Docker Setup Per pedes
@@ -19,7 +14,7 @@
    ```
 2. **Projektverzeichnis wechseln:**
    ```bash
-   cd ~/chat2robot/docker
+   cd chat2robot/docker
    ```
 3. **Container bauen:**
    ```bash
@@ -36,35 +31,12 @@
    ```
 5. **Auf Container zugreifen:**
    ```bash
-   docker exec -it ros2_turtlebot3_gpu bash
+   docker exec -it ros2_turtlebot3 bash
    ```
 6. **Container stoppen:**
    ```bash
    docker compose down
    ```
-
-# ROS2 TurtleBot3 Docker-Setup
-
-## Schnellstart: So startest du den Docker-Container
-
-1. **Wechsle ins Docker-Verzeichnis:**
-   ```bash
-   cd docker
-   ```
-2. **Setze eine neue Umgebungsvariable:**
-   ```bash
-   export GOOGLE_API_KEY="ABCDFEGH12345678"
-   source ~/.bashrc
-   ```
-3. **Führe das bash-Skript aus:**
-   ```bash
-   ./setup_and_run.sh
-   ```
-4. **Öffne eine Bash-Shell im laufenden Container:**
-   ```bash
-   docker exec -it ros2_turtlebot3_gpu bash
-   ```
-   *(Der Name `ros2_turtlebot3_gpu` steht in der `docker-compose.yaml` unter `container_name`.)*
 
 **Hinweise:**
 
