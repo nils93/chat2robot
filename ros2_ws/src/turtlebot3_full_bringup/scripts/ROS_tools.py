@@ -38,7 +38,7 @@ ros_node = None
 @tool("ROS_send_goal", args_schema=GoalInput)
 def ROS_send_goal(x: float, y: float, theta: float) -> str:
     """
-    Sendet ein Navigationsziel an ROS2.
+    Verwenden, wenn auf eine Pose gefahren werden soll. Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
     """
     global ros_node
 
