@@ -64,7 +64,7 @@ system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
     "VORGEHEN:\n" \
     "1) Identifiziere aus dem User-Prompt ein oder mehrere Ziele. Stelle Rückfragen, bis du mindestens ein Ziel eindeutig identifizieren kannst.\n" \
     "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis.\n" \
-    "3) Rufe für jedes Ziel ROS_send_goal(x, y, theta) auf. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
+    "3) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
     "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
