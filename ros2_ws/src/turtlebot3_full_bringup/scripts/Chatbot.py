@@ -11,9 +11,7 @@ from langchain_mistralai import ChatMistralAI
 
 #eigene Module
 from Chatbot_header_RAG import RAG_Functions
-from ROS_tools import ROS_send_second_goal,ROS_send_first_goal,  rechner, ROS_get_navigation_status#, wait_state
-
-
+from ROS_tools import ROS_send_goal, rechner, ROS_get_navigation_status
 
 
 def select_llm():
@@ -66,8 +64,8 @@ system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
     "VORGEHEN:\n" \
     "1) Identifiziere aus dem User-Prompt ein oder mehrere Ziele. Stelle Rückfragen, bis du mindestens ein Ziel eindeutig identifizieren kannst.\n" \
     "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis.\n" \
-    "3) Bleibe solange online und warte, schließe nicht die Anfrage!\n" \
-    "4) WICHTIG: Rufe für die erste Pose die du anfahren sollst das Tool ROS_send_first_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: nutze erst das Tool 'ROS_send_first_goal', dann wartest du bis du das Tool 'ROS_get_navigation_status' die Rückmeldung 'SUCCEEDED' liefert (BLEIBE ONLINE und warte, brech die Anfrage nicht ab) und führe danach 'ROS_send_second_goal' mit den zweiten Koordinatenset aus.\n\n" \
+    "3) Eine Navigation ist erst beendet, wenn den Navigationsstatus SUCCEDED, CANCELED oder ABORTED ist. Warte, bis der entsprechende Navigationsstatus rueckgemeldet wird. Frage die status solange ab, bis eine entsprechende Rueckmeldung vorliegt. Bis dahin nehmen keine neuen anfragen an.\n" \
+    "4) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
     "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
@@ -88,7 +86,7 @@ RAG_1.VectorStorage() #VectorStore aufbauen ->Funktion nochmal selbst machen, ha
 
 
 #Tools einbinden
-tools=[rechner, ROS_send_first_goal, ROS_send_second_goal, ROS_get_navigation_status]#, wait_state]
+tools=[rechner, ROS_send_goal, ROS_get_navigation_status]
 
 # Agent anlegen (gehirn/grundfunktionen)
 LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt) 
@@ -100,6 +98,7 @@ LLM_agent_executor = AgentExecutor(
     verbose=True,   # True: Zeigt den Denkprozess des Agenten
     handle_parsing_errors=True
     )
+
 
 def main():
 
