@@ -17,6 +17,7 @@ class GoalInput(BaseModel):
     y: float = Field(description="Y position in map frame")
     theta: float = Field(description="Yaw angle in radians")
 
+ros_object = None
 class ROSGoalPublisher(Node):
     def __init__(self):
         super().__init__('llm_goal_publisher')
@@ -75,8 +76,6 @@ class ROSGoalPublisher(Node):
         returns status code of navigation
         """
         return self.nav_status_code
-    
-ros_object = None
 
 @tool("ROS_send_goal", args_schema=GoalInput)
 def ROS_send_goal(x: float, y: float, theta: float) -> str:
@@ -87,22 +86,16 @@ def ROS_send_goal(x: float, y: float, theta: float) -> str:
     global ros_object
 
     if ros_object is None:
-        rclpy.init()
-        ros_object = ROSGoalPublisher()
-        threading.Thread(
-            target=rclpy.spin,
-            args=(ros_object,),
-            daemon=True
-        ).start()
-
+        return "FEHLER: ROS2 noch nicht initialisiert"
+    
     ros_object.publish_goal(x,y,theta)
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
 
-@tool  #Nicht in Verwendung; Opt. Platzhalter
+@tool
 def ROS_get_navigation_status():
     """
-    Returns current naviagtion status of the last navigation goal. Interprets the status_code
-    From ROS2-documentation:
+    Rufe dieses Tool auf um zu prüfen ob der Roboter sein Ziel erreicht hat.
+    Gibt den aktuellen Navigationsstatus zurück. Entweder als Status-Code, oder als interpretierter kurzer Text.
 
     Compact Message Definition
     int8 STATUS_UNKNOWN=0
@@ -116,17 +109,7 @@ def ROS_get_navigation_status():
     int8 status
     """
 
-    global ros_object
-
-    if ros_object is None:
-        rclpy.init()
-        ros_object = ROSGoalPublisher()
-        threading.Thread(
-            target=rclpy.spin,
-            args=(ros_object,),
-            daemon=True
-        ).start()
-        
+    global ros_object       
 
     status_code = ros_object.get_status_code()
     return str(status_code)
