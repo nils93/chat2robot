@@ -1,5 +1,6 @@
 import os
 import getpass
+import time
 
 from langchain.chat_models import init_chat_model  #hier wird langchain importiert
 from langchain_classic.agents import create_tool_calling_agent, AgentExecutor      #neue Version des "langchain-agents import create_tool_calling_agent in zeile 20"
@@ -10,8 +11,12 @@ from langchain_core.prompts import ChatPromptTemplate #notwendig, da dem Agent k
 from langchain_mistralai import ChatMistralAI
 
 #eigene Module
-from Chatbot_header_RAG import RAG_Functions
-from Chatbot_header_tools import rechner, ROS_cmd_vel
+from RAG import RAG_Functions
+import ROS_tools
+
+#ROS
+import rclpy
+import threading
 
 
 def select_llm():
@@ -29,7 +34,7 @@ def select_llm():
 
         return ChatMistralAI(
             model="mistral-small-latest",
-            temperature=0.4,
+            temperature=0.5,
             top_p=0.8
         )
     
@@ -63,8 +68,10 @@ system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
     "Deine Wissensbasis ist der Inhalt der per RAG hinterlegten Dokumente.\n\n" \
     "VORGEHEN:\n" \
     "1) Identifiziere aus dem User-Prompt ein oder mehrere Ziele. Stelle Rückfragen, bis du mindestens ein Ziel eindeutig identifizieren kannst.\n" \
-    "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis.\n" \
-    "3) Rufe für jedes Ziel ROS_send_goal(x, y, theta) auf. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
+    "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis, oder aus der Chathistorie.\n" \
+    "3) Falls Du nach dem aktuellen Navigationsstatus gefragt wird, melde eine kurze Info zurück. Rufe dazu das geeignete tool auf. " \
+    "4) Eine Navigation ist erst beendet, wenn den Navigationsstatus SUCCEDED, CANCELED oder ABORTED ist. Rufe dazu regelmäßig das geeignete tool auf, bis der entsprechende Navigationsstatus von ROS rueckgemeldet wird. Frage die status solange ab, bis eine entsprechende Rueckmeldung vorliegt. Bis dahin nehmen keine neuen anfragen an.\n" \
+    "5) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
     "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
@@ -85,7 +92,7 @@ RAG_1.VectorStorage() #VectorStore aufbauen ->Funktion nochmal selbst machen, ha
 
 
 #Tools einbinden
-tools=[rechner, ROS_cmd_vel]
+tools=[ROS_tools.ROS_send_goal, ROS_tools.ROS_get_navigation_status]
 
 # Agent anlegen (gehirn/grundfunktionen)
 LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt) 
@@ -98,34 +105,54 @@ LLM_agent_executor = AgentExecutor(
     handle_parsing_errors=True
     )
 
+rclpy.init() #initialisieren ROS2 
+ROS_tools.ros_object = ROS_tools.ROSGoalPublisher()
+threading.Thread(
+    target=rclpy.spin,
+    args=(ROS_tools.ros_object,),
+    daemon=True
+).start()
+time.sleep(1)
+
+
+if ROS_tools.ros_object is None:
+    print("FEHLER: ROS2 noch nicht initialisiert")
+else:
+    print("\n+ + + ROS2 initialisiert + + +\n")
+
 
 def main():
 
     while True:
         #Einlesen von Informationen-> UserPrompt
-        InputMessage=input("Was möchtest du der AI sagen?")
+        UserInput=input("Was möchtest du der AI sagen?")
 
         #Abbrunchbedingung
-        if InputMessage=="exit":
+        if UserInput=="exit":
             break
 
+         # User Anfrage in history ergänzen
+        chat_history.append(HumanMessage(content=UserInput))
+
         # Ähnliche Vektoren vie RAG finden
-        RAG_1.query(InputMessage) 
-        
-        #zu history ergänzen 
+        RAG_1.query(UserInput)
         similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
-        chat_history.append(HumanMessage(content="RAG-Content: "+str(similar_content)))
+
+        LLM_input = f"User Anfrage: {UserInput}\n\n" \
+                    f"Wissensbasis-chunks: \n{similar_content}"
         
         #LLM-agent Antwort erstellen
-        LLM_answer=LLM_agent_executor.invoke({"input": InputMessage, "chat_history_LLM": chat_history})
+        LLM_answer=LLM_agent_executor.invoke({"input": LLM_input, "chat_history_LLM": chat_history})
         
         #Abspeichern der Antwort und anhängen an die Historie
         chat_history.append(AIMessage(content=LLM_answer["output"]))
 
         output_str = RAG_1.LLM_OutputAsListToStr(LLM_answer["output"])
-        print(f"Chatbot: {output_str}")
-        
-        print(f"\nAnzahl Nachrichten in Historie: {len(chat_history)}")
+        #print(f"Chatbot: {output_str}")
+
+        anzahl_anfragen=len(chat_history)/2
+
+        print(f"\nAnzahl Nachrichten in Historie: {anzahl_anfragen}")
 
 if __name__ == "__main__":
     main()

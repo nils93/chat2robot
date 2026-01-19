@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
+from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
+from action_msgs.msg import GoalStatusArray
 
 import math
 import threading
@@ -14,45 +16,100 @@ class GoalInput(BaseModel):
     x: float = Field(description="X position in map frame")
     y: float = Field(description="Y position in map frame")
     theta: float = Field(description="Yaw angle in radians")
+
+ros_object = None
 class ROSGoalPublisher(Node):
     def __init__(self):
         super().__init__('llm_goal_publisher')
+
+        qos = QoSProfile(
+            reliability=ReliabilityPolicy.BEST_EFFORT,
+            durability=DurabilityPolicy.VOLATILE,
+            history=HistoryPolicy.KEEP_LAST,
+            depth=1
+        )
+
+
         self.publisher = self.create_publisher(
             PoseStamped,
             '/goal_pose',
-            10
+            qos
         )
 
-ros_node = None
+        self.nav_status_code = 0 #=unknown
+
+        self.create_subscription( #sub für action status nav2
+            GoalStatusArray,
+            '/navigate_to_pose/_action/status',
+            self._status_callback,
+            10
+        )
+        
+    
+    def publish_goal(self,x,y,theta):
+        msg = PoseStamped()
+        msg.header.frame_id = "map"
+        msg.header.stamp = ros_object.get_clock().now().to_msg()
+
+        msg.pose.position.x = x
+        msg.pose.position.y = y
+        msg.pose.position.z = 0.0
+
+        msg.pose.orientation.z = math.sin(theta / 2.0)
+        msg.pose.orientation.w = math.cos(theta / 2.0)
+
+        self.publisher.publish(msg)
+        self.get_logger().info(f"Goal published: x={x}, y={y}, theha={theta}")
+
+    def _status_callback(self, msg_status):
+        """
+        (automatic) Callback: returns the navigation status for latest published goal"
+        """
+
+        if len(msg_status.status_list) == 0: #kein status vorhanden
+            return
+
+        self.nav_status_code = msg_status.status_list[-1].status
+
+    def get_status_code(self):
+        """
+        returns status code of navigation
+        """
+        return self.nav_status_code
+
 @tool("ROS_send_goal", args_schema=GoalInput)
 def ROS_send_goal(x: float, y: float, theta: float) -> str:
     """
-    Sendet ein Navigationsziel an ROS2.
+    Verwenden, wenn auf Posen gefahren werden soll. \n
+    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
     """
-    global ros_node
+    global ros_object
 
-    if ros_node is None:
-        rclpy.init()
-        ros_node = ROSGoalPublisher()
-        threading.Thread(
-            target=rclpy.spin,
-            args=(ros_node,),
-            daemon=True
-        ).start()
-
-    msg = PoseStamped()
-    msg.header.frame_id = "map"
-    msg.header.stamp = ros_node.get_clock().now().to_msg()
-
-    msg.pose.position.x = x
-    msg.pose.position.y = y
-    msg.pose.position.z = 0.0
-
-    msg.pose.orientation.z = math.sin(theta / 2.0)
-    msg.pose.orientation.w = math.cos(theta / 2.0)
-
-    ros_node.publisher.publish(msg)
-    ros_node.get_logger().info(f"Goal published: x={x}, y={y}, theha={theta}")
-
+    if ros_object is None:
+        return "FEHLER: ROS2 noch nicht initialisiert"
+    
+    ros_object.publish_goal(x,y,theta)
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
 
+@tool
+def ROS_get_navigation_status():
+    """
+    Rufe dieses Tool auf um zu prüfen ob der Roboter sein Ziel erreicht hat.
+    Gibt den aktuellen Navigationsstatus zurück. Entweder als Status-Code, oder als interpretierter kurzer Text.
+
+    Compact Message Definition
+    int8 STATUS_UNKNOWN=0
+    int8 STATUS_ACCEPTED=1
+    int8 STATUS_EXECUTING=2
+    int8 STATUS_CANCELING=3
+    int8 STATUS_SUCCEEDED=4
+    int8 STATUS_CANCELED=5
+    int8 STATUS_ABORTED=6
+    action_msgs/msg/GoalInfo goal_info
+    int8 status
+    """
+
+    global ros_object       
+
+    status_code = ros_object.get_status_code()
+    return str(status_code)

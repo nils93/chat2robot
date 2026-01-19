@@ -1,5 +1,3 @@
-import numpy as np
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter #Für das Chunking
 from langchain_huggingface import HuggingFaceEmbeddings #Für Embeddings
 from langchain_community.vectorstores import FAISS #Für Speichern der Vektoren
@@ -26,10 +24,6 @@ class RAG_Functions:
         #2. Chunking ausführen
         self.chunks = splitter.split_text(self.imported_text)
         
-        #3. Ausgabe
-        #for i, c in enumerate(chunks):
-        #    print(f"Chunk {i+1}:\n{c}\n---")
-        #return chunks
         print("-> 1.Chunking durchgefuehrt")
 
 
@@ -49,10 +43,6 @@ class RAG_Functions:
 
         # 2 Ähnliche Chunks aus FAISS-Datenbank suchen
         self.similar_vectors = self.VectorDatenbank.similarity_search_by_vector(user_vector, k=6)      #k=anzahl der naheliegensten Vektoren (höchste Kosinus-Similarity zum User-Prompt   )
-
-        # 3 Ausgabe oder Weitergabe ans LLM
-        #for i, doc in enumerate(self.similar_vectors):
-        #    print(f"Treffer {i+1}: {doc.page_content[:400]}")
         
         print("-> 4. Vergleich UserPromt mit VectorStorage durchgefuehrt")
     
