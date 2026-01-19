@@ -98,7 +98,7 @@ def ROS_send_goal(x: float, y: float, theta: float) -> str:
     ros_object.publish_goal(x,y,theta)
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
 
-@tool
+@tool  #Nicht in Verwendung; Opt. Platzhalter
 def ROS_get_navigation_status():
     """
     Returns current naviagtion status of the last navigation goal. Interprets the status_code
@@ -130,25 +130,3 @@ def ROS_get_navigation_status():
 
     status_code = ros_object.get_status_code()
     return str(status_code)
-
-
-@tool
-def rechner(a: int, b: int, operation: str) -> int:
-    """Führt eine mathematische Operation durch.
-    
-    Args:
-        a: Erste Zahl
-        b: Zweite Zahl
-        operation: Die Operation ('add', 'subtract', 'multiply', 'divide')
-    """
-    if operation == "add":
-        return a + b
-    elif operation == "subtract":
-        return a - b
-    elif operation == "multiply":
-        return a * b
-    elif operation == "divide":
-        return a / b if b != 0 else "Division durch Null!"
-    else:
-        return "Unbekannte Operation"
-
