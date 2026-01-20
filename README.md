@@ -58,10 +58,12 @@ python3 -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501
 ```
 Choose your Model.
 Wait...
+
+```bash
 In Terminal: Login with yout email-adress
 
 Open Browser and open http://0.0.0.0:8501
-
+```
 Tell the AI where you want you robot to drive!
 
 
