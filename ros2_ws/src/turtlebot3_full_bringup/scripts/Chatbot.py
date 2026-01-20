@@ -120,29 +120,30 @@ if ROS_tools.ros_object is None:
 else:
     print("\n+ + + ROS2 initialisiert + + +\n")
 
-def chat_step(user_input: str) -> str:
+def chat_main_fct(user_input_via_app: str) -> str:
     global chat_history
 
     # User Anfrage in history
-    chat_history.append(HumanMessage(content=user_input))
+    chat_history.append(HumanMessage(content=user_input_via_app))
 
     # RAG
-    RAG_1.query(user_input)
+    RAG_1.query(user_input_via_app)
     similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
 
     LLM_input = (
-        f"User Anfrage: {user_input}\n\n"
+        f"User Anfrage: {user_input_via_app}\n\n"
         f"Wissensbasis-chunks:\n{similar_content}"
     )
 
-    # Agent ausführen
-    result = LLM_agent_executor.invoke({
+    #Agenten mit "create_tool_calling_agent" global angelegt (Zeile 98)
+    #Agent_Executor mit "AgentExecutor(...)" angelget (Zeile 100)
+
+    # Agent_executor ausführen 
+    LLM_Answer = LLM_agent_executor.invoke({
         "input": LLM_input,
         "chat_history_LLM": chat_history
     })
 
-    output = result["output"]
+    chat_history.append(AIMessage(content=LLM_Answer["output"]))
 
-    chat_history.append(AIMessage(content=output))
-
-    return RAG_1.LLM_OutputAsListToStr(output)
+    return RAG_1.LLM_OutputAsListToStr(LLM_Answer["output"])
