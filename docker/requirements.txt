@@ -13,4 +13,7 @@ langchain-google-genai==3.0.0
 langchain-huggingface==1.0.0
 langchain-mistralai==1.1.1
 
+streamlit>=1.28.0
+
+
 tqdm==4.67.1

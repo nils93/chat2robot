@@ -54,11 +54,15 @@ docker exec -it ros2_turtlebot3 bash
 Change folder (TODO:change the path in Chatbot.py for Angabe.tex from relatv to absolut see we don't need to change folder, also rename chatbot.py)
 ```bash
 cd src/turtlebot3_full_bringup/scripts
-python3 Chatbot.py
+python3 -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501
 ```
 Choose your Model.
 Wait...
-Tell the AI where you want your robot to drive!
+In Terminal: Login with yout email-adress
+
+Open Browser and open http://0.0.0.0:8501
+
+Tell the AI where you want you robot to drive!
 
 
 
