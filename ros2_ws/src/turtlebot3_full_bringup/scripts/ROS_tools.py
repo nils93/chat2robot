@@ -11,6 +11,26 @@ from action_msgs.msg import GoalStatusArray
 import math
 import threading
 
+import asyncio
+
+@tool
+def WaitTool():
+    """"
+    Warte Funktion zwischen dem Publishen von zwei Posen
+    """
+    async def wait_until_event(event: asyncio.Event):
+        await event.wait()
+
+    event = asyncio.Event()
+
+    async def external_event():
+        await asyncio.sleep(5)
+        event.set()
+
+#await wait_until_event(event)
+
+
+WAIT_EVENT = Event()
 
 class GoalInput(BaseModel):
     x: float = Field(description="X position in map frame")
@@ -78,10 +98,10 @@ class ROSGoalPublisher(Node):
     
 ros_object = None
 
-@tool("ROS_send_goal", args_schema=GoalInput)
-def ROS_send_goal(x: float, y: float, theta: float) -> str:
+@tool("ROS_send_first_goal", args_schema=GoalInput)
+def ROS_send_first_goal(x: float, y: float, theta: float) -> str:
     """
-    Verwenden, wenn auf Posen gefahren werden soll. \n
+    Verwenden, wenn auf erste Posen gefahren werden soll. \n
     Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
     """
     global ros_object
@@ -131,6 +151,35 @@ def ROS_get_navigation_status():
     status_code = ros_object.get_status_code()
     return str(status_code)
 
+@tool("ROS_send_second_goal", args_schema=GoalInput)
+def ROS_send_second_goal(x: float, y: float, theta: float) -> str:
+    """
+    Verwenden, wenn auf zwei Posen gefahren werden soll Published die zweite Pose, die Angefahren werden soll. \n
+    Nur möglich, wenn bereits 'Ros_send_goal' ausgeführt wurde.\n
+    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
+    """
+    global ros_object
+
+    if ros_object is None:
+        rclpy.init()
+        ros_object = ROSGoalPublisher()
+        threading.Thread(
+            target=rclpy.spin,
+            args=(ros_object,),
+            daemon=True
+        ).start()
+
+    ros_object.publish_goal(x,y,theta)
+    return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
+
+
+
+#WAIT_EVENT = if(ROS_get_navigation_status()=="STATUS_SUCCEEDED")
+
+# @tool
+# def wait_state(state: AgentState)->AgentState:
+#     WAIT_EVENT.wait()
+#     return state
 
 @tool
 def rechner(a: int, b: int, operation: str) -> int:
@@ -151,4 +200,3 @@ def rechner(a: int, b: int, operation: str) -> int:
         return a / b if b != 0 else "Division durch Null!"
     else:
         return "Unbekannte Operation"
-
