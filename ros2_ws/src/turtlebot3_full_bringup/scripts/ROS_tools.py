@@ -1,15 +1,13 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
 
-#ROS2
+# ROS2 / Nav2 Action
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import PoseStamped
-from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPolicy
-from action_msgs.msg import GoalStatusArray
+from rclpy.action import ActionClient
+from nav2_msgs.action import NavigateToPose
 
 import math
-import threading
 
 
 class GoalInput(BaseModel):
@@ -17,99 +15,124 @@ class GoalInput(BaseModel):
     y: float = Field(description="Y position in map frame")
     theta: float = Field(description="Yaw angle in radians")
 
+
 ros_object = None
+
+
 class ROSGoalPublisher(Node):
     def __init__(self):
-        super().__init__('llm_goal_publisher')
+        super().__init__("llm_goal_publisher")
 
-        qos = QoSProfile(
-            reliability=ReliabilityPolicy.BEST_EFFORT,
-            durability=DurabilityPolicy.VOLATILE,
-            history=HistoryPolicy.KEEP_LAST,
-            depth=1
-        )
+        # Action client for Nav2 NavigateToPose
+        self._action_client = ActionClient(self, NavigateToPose, "/navigate_to_pose")
 
+        # navigation status code (your mapping)
+        # 0 UNKNOWN, 1 ACCEPTED, 2 EXECUTING, 3 CANCELING, 4 SUCCEEDED, 5 CANCELED, 6 ABORTED
+        self.nav_status_code = 0
 
-        self.publisher = self.create_publisher(
-            PoseStamped,
-            '/goal_pose',
-            qos
-        )
+    def publish_goal(self, x: float, y: float, theta: float):
+        # Reset status for new goal
+        self.nav_status_code = 0
 
-        self.nav_status_code = 0 #=unknown
-
-        self.create_subscription( #sub für action status nav2
-            GoalStatusArray,
-            '/navigate_to_pose/_action/status',
-            self._status_callback,
-            10
-        )
-        
-    
-    def publish_goal(self,x,y,theta):
-        msg = PoseStamped()
-        msg.header.frame_id = "map"
-        msg.header.stamp = ros_object.get_clock().now().to_msg()
-
-        msg.pose.position.x = x
-        msg.pose.position.y = y
-        msg.pose.position.z = 0.0
-
-        msg.pose.orientation.z = math.sin(theta / 2.0)
-        msg.pose.orientation.w = math.cos(theta / 2.0)
-
-        self.publisher.publish(msg)
-        self.get_logger().info(f"Goal published: x={x}, y={y}, theha={theta}")
-
-    def _status_callback(self, msg_status):
-        """
-        (automatic) Callback: returns the navigation status for latest published goal"
-        """
-
-        if len(msg_status.status_list) == 0: #kein status vorhanden
+        # Wait for Nav2 action server
+        if not self._action_client.wait_for_server(timeout_sec=2.0):
+            self.get_logger().error("Nav2 action server '/navigate_to_pose' not available!")
+            self.nav_status_code = 6  # ABORTED-like
             return
 
-        self.nav_status_code = msg_status.status_list[-1].status
+        goal_msg = NavigateToPose.Goal()
+        goal_msg.pose.header.frame_id = "map"
+        goal_msg.pose.header.stamp = self.get_clock().now().to_msg()
 
-    def get_status_code(self):
-        """
-        returns status code of navigation
-        """
-        return self.nav_status_code
+        goal_msg.pose.pose.position.x = x
+        goal_msg.pose.pose.position.y = y
+        goal_msg.pose.pose.position.z = 0.0
+
+        goal_msg.pose.pose.orientation.z = math.sin(theta / 2.0)
+        goal_msg.pose.pose.orientation.w = math.cos(theta / 2.0)
+
+        # Send goal async
+        send_future = self._action_client.send_goal_async(goal_msg)
+        send_future.add_done_callback(self._goal_response_callback)
+
+        self.get_logger().info(f"Goal sent via action: x={x}, y={y}, theta={theta}")
+
+    def _goal_response_callback(self, future):
+        """Called once Nav2 answers whether the goal is accepted/rejected."""
+        try:
+            goal_handle = future.result()
+        except Exception as e:
+            self.get_logger().error(f"Goal response callback error: {e}")
+            self.nav_status_code = 6
+            return
+
+        if not goal_handle.accepted:
+            self.get_logger().warn("Goal rejected by Nav2")
+            self.nav_status_code = 6
+            return
+
+        self.get_logger().info("Goal accepted by Nav2")
+        self.nav_status_code = 2  # EXECUTING (good enough for UI)
+
+        # Request final result
+        result_future = goal_handle.get_result_async()
+        result_future.add_done_callback(self._result_callback)
+
+    def _result_callback(self, future):
+        """Called once Nav2 returns final result of navigation."""
+        try:
+            result = future.result()
+        except Exception as e:
+            self.get_logger().error(f"Result callback error: {e}")
+            self.nav_status_code = 6
+            return
+
+        # result.status is an action status code:
+        # SUCCEEDED=4, CANCELED=5, ABORTED=6  (matches your mapping)
+        self.nav_status_code = int(result.status)
+
+        if self.nav_status_code == 4:
+            self.get_logger().info("Navigation SUCCEEDED (result)")
+        elif self.nav_status_code == 5:
+            self.get_logger().warn("Navigation CANCELED (result)")
+        elif self.nav_status_code == 6:
+            self.get_logger().error("Navigation ABORTED (result)")
+        else:
+            self.get_logger().info(f"Navigation finished with status={self.nav_status_code}")
+
+    def get_status_code(self) -> int:
+        return int(self.nav_status_code)
+
 
 @tool("ROS_send_goal", args_schema=GoalInput)
 def ROS_send_goal(x: float, y: float, theta: float) -> str:
     """
-    Verwenden, wenn auf Posen gefahren werden soll. \n
-    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
+    Verwenden, wenn auf Posen gefahren werden soll.
+    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der Winkel Theta.
+    Sendet ein Navigationsziel an ROS2 (Nav2 Action: /navigate_to_pose).
     """
     global ros_object
-
     if ros_object is None:
         return "FEHLER: ROS2 noch nicht initialisiert"
-    
-    ros_object.publish_goal(x,y,theta)
+
+    ros_object.publish_goal(x, y, theta)
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
+
 
 @tool
 def ROS_get_navigation_status():
     """
-    Rufe dieses Tool auf um zu prüfen ob der Roboter sein Ziel erreicht hat.
-    Gibt den aktuellen Navigationsstatus zurück. Entweder als Status-Code, oder als interpretierter kurzer Text.
+    Prüft, ob der Roboter sein Ziel erreicht hat und gibt den Status-Code zurück.
 
-    Compact Message Definition
-    int8 STATUS_UNKNOWN=0
-    int8 STATUS_ACCEPTED=1
-    int8 STATUS_EXECUTING=2
-    int8 STATUS_CANCELING=3
-    int8 STATUS_SUCCEEDED=4
-    int8 STATUS_CANCELED=5
-    int8 STATUS_ABORTED=6
-    action_msgs/msg/GoalInfo goal_info
-    int8 status
+    STATUS_UNKNOWN=0
+    STATUS_ACCEPTED=1
+    STATUS_EXECUTING=2
+    STATUS_CANCELING=3
+    STATUS_SUCCEEDED=4
+    STATUS_CANCELED=5
+    STATUS_ABORTED=6
     """
-
-    global ros_object       
-
-    status_code = ros_object.get_status_code()
-    return str(status_code)
+    global ros_object
+    if ros_object is None:
+        return "0"
+    return str(ros_object.get_status_code())

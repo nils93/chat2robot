@@ -1,6 +1,7 @@
+import time
 import streamlit as st
-import random
 from Chatbot import chat_step
+from ROS_tools import ROS_get_navigation_status
 
 st.set_page_config(
     page_title="Robot Chatbot",
@@ -11,53 +12,59 @@ st.set_page_config(
 st.title("Control Interface")
 st.caption("MRK Project")
 
-# --- Fun/Serious Toggle ---
-st.markdown("### 😐 Oder soll der Roboter heute *lustig* sein?")
-fun_mode = st.toggle("🤖 Fun Mode aktivieren", value=False)
+COMMENT_START_TURN1 = "Ich fahre los — wenn /cmd_vel heute gute Laune hat."
+COMMENT_REACHED_TURN1 = "Position erreicht… also zumindest im TF-Tree. 😄 … spaẞ!!"
+COMMENT_TURN3 = "Plan ist solide. Realität ist optional."
 
-if fun_mode:
-    st.info("🎭 Fun Mode ist AN — der Roboter darf jetzt frech sein.")
-else:
-    st.success("🧑‍💼 Serious Mode ist AN — Business only.")
-
-# Session State für UI-Chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Bisherige Nachrichten anzeigen
+if "user_turns" not in st.session_state:
+    st.session_state.user_turns = 0
+
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# User Input
 if prompt := st.chat_input("Wohin soll der Roboter fahren?"):
-    # User anzeigen
+    st.session_state.user_turns += 1
+
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # Bot Antwort
     with st.chat_message("assistant"):
+        placeholder = st.empty()
+
         response = chat_step(prompt)
-        st.markdown(response)
+        response_ui = response
 
-        # --- Fun Mode Extras (nur wenn aktiv) ---
-        if fun_mode:
-            ros_jokes = [
-                "🤖 ROS sagt: Ziel erreicht. Realität sagt: Wand.",
-                "🤖 Ich nutze ROS2. Deshalb dauert alles minimal länger.",
-                "🤖 Navigation läuft… hoffentlich.",
-                "🤖 Ich bin nicht lost — ich mache nur Mapping.",
-                "🤖 TF-Tree stabil… (haha, guter Witz).",
-            ]
+        if st.session_state.user_turns == 1:
+            response_ui += "\n\n💬 _" + COMMENT_START_TURN1 + "_"
 
-            # 15% Chance auf einen Joke
-            if random.random() < 0.5:
-                st.markdown(f"*{random.choice(ros_jokes)}*")
+        if st.session_state.user_turns == 3:
+            response_ui += "\n\n💬 _" + COMMENT_TURN3 + "_"
 
-            # Pseudo-Confidence-Bar
-            confidence = min(100, len(prompt) * 8)
-            st.progress(confidence)
-            st.caption(f"Roboter-Confidence: {confidence}%")
+        placeholder.markdown(response_ui)
 
-    st.session_state.messages.append({"role": "assistant", "content": response})
+        if st.session_state.user_turns == 1:
+            timeout_s = 90
+            start = time.time()
+
+            while True:
+                try:
+                    status_code = int(ROS_get_navigation_status())
+                except Exception:
+                    status_code = 0
+
+                if status_code == 4:  # SUCCEEDED
+                    response_ui += "\n\n✅ _" + COMMENT_REACHED_TURN1 + "_"
+                    placeholder.markdown(response_ui)
+                    break
+
+                if time.time() - start > timeout_s:
+                    break
+
+                time.sleep(0.2)
+
+    st.session_state.messages.append({"role": "assistant", "content": response_ui})

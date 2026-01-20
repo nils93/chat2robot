@@ -120,39 +120,29 @@ if ROS_tools.ros_object is None:
 else:
     print("\n+ + + ROS2 initialisiert + + +\n")
 
+def chat_step(user_input: str) -> str:
+    global chat_history
 
-def main():
+    # User Anfrage in history
+    chat_history.append(HumanMessage(content=user_input))
 
-    while True:
-        #Einlesen von Informationen-> UserPrompt
-        UserInput=input("Was möchtest du der AI sagen?")
+    # RAG
+    RAG_1.query(user_input)
+    similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
 
-        #Abbrunchbedingung
-        if UserInput=="exit":
-            break
+    LLM_input = (
+        f"User Anfrage: {user_input}\n\n"
+        f"Wissensbasis-chunks:\n{similar_content}"
+    )
 
-         # User Anfrage in history ergänzen
-        chat_history.append(HumanMessage(content=UserInput))
+    # Agent ausführen
+    result = LLM_agent_executor.invoke({
+        "input": LLM_input,
+        "chat_history_LLM": chat_history
+    })
 
-        # Ähnliche Vektoren vie RAG finden
-        RAG_1.query(UserInput)
-        similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
+    output = result["output"]
 
-        LLM_input = f"User Anfrage: {UserInput}\n\n" \
-                    f"Wissensbasis-chunks: \n{similar_content}"
-        
-        #LLM-agent Antwort erstellen
-        LLM_answer=LLM_agent_executor.invoke({"input": LLM_input, "chat_history_LLM": chat_history})
-        
-        #Abspeichern der Antwort und anhängen an die Historie
-        chat_history.append(AIMessage(content=LLM_answer["output"]))
+    chat_history.append(AIMessage(content=output))
 
-        output_str = RAG_1.LLM_OutputAsListToStr(LLM_answer["output"])
-        #print(f"Chatbot: {output_str}")
-
-        anzahl_anfragen=len(chat_history)/2
-
-        print(f"\nAnzahl Nachrichten in Historie: {anzahl_anfragen}")
-
-if __name__ == "__main__":
-    main()
+    return RAG_1.LLM_OutputAsListToStr(output)
