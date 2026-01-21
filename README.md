@@ -51,7 +51,7 @@ In a new terminal:
 ```bash
 docker exec -it ros2_turtlebot3 bash
 ```
-Change folder (TODO:change the path in Chatbot.py for Angabe.tex from relatv to absolut see we don't need to change folder, also rename chatbot.py)
+Change folder (TODO: change the path in chatbot.py for Angabe.tex from relative to absolute so we don't need to change folder)
 ```bash
 cd src/turtlebot3_full_bringup/scripts
 python3 -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501
