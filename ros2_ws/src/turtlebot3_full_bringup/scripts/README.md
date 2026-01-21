@@ -1,8 +1,8 @@
-# Python Script Chatbot.py
+# Python Script chatbot.py
 
 ```bash
 cd src/turtlebot_full_bringup/scripts/
-python3 Chatbot.py
+python3 chatbot.py
 ```
 
 ```bash
