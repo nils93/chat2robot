@@ -71,7 +71,7 @@ system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
     "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis, oder aus der Chathistorie.\n" \
     "3) Falls Du nach dem aktuellen Navigationsstatus gefragt wird, melde eine kurze Info zurück. Rufe dazu das geeignete tool auf. " \
     "4) Eine Navigation ist erst beendet, wenn den Navigationsstatus SUCCEDED, CANCELED oder ABORTED ist. Rufe dazu regelmäßig das geeignete tool auf, bis der entsprechende Navigationsstatus von ROS rueckgemeldet wird. Frage die status solange ab, bis eine entsprechende Rueckmeldung vorliegt. Bis dahin nehmen keine neuen anfragen an.\n" \
-    "5) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
+    "5) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei zwei Zielen: Rufe das Tool 'ROS_send_tow_goals'\n\n" \
     "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
@@ -83,7 +83,6 @@ full_prompt = ChatPromptTemplate.from_messages([
 ])
 
 #RAG initialisieren
-
 RAG_1=RAG_Functions()   #Konstruktor
 RAG_1.text_input() #.tex einlesen
 RAG_1.chunking() #ausführen der Chunking Funktion
@@ -92,7 +91,7 @@ RAG_1.VectorStorage() #VectorStore aufbauen ->Funktion nochmal selbst machen, ha
 
 
 #Tools einbinden
-tools=[ROS_tools.ROS_send_goal, ROS_tools.ROS_get_navigation_status]
+tools=[ROS_tools.ROS_send_goal,ROS_tools.ROS_send_two_goals, ROS_tools.ROS_get_navigation_status]
 
 # Agent anlegen (gehirn/grundfunktionen)
 LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt) 
