@@ -37,7 +37,6 @@ install(DIRECTORY
   launch
   maps
   rviz
-  test
   turtlebot3_full_bringup
   worlds
   DESTINATION share/${PROJECT_NAME}/
