@@ -1,5 +1,6 @@
 from langchain_core.tools import tool
 from pydantic import BaseModel, Field
+import time
 
 #ROS2
 import rclpy
@@ -17,7 +18,16 @@ class GoalInput(BaseModel):
     y: float = Field(description="Y position in map frame")
     theta: float = Field(description="Yaw angle in radians")
 
+class TwoGoalsInput(BaseModel):
+    x_1: float = Field(description="X position of first goal in map frame")
+    y_1: float = Field(description="Y position of first goal in map frame")
+    theta_1: float = Field(description="Yaw angle of first goal in radians")
+    x_2: float = Field(description="X position of second goal in map frame")
+    y_2: float = Field(description="Y position of second goal in map frame")
+    theta_2: float = Field(description="Yaw angle of second goal in radians")
+
 ros_object = None
+
 class ROSGoalPublisher(Node):
     def __init__(self):
         super().__init__('llm_goal_publisher')
@@ -81,7 +91,7 @@ class ROSGoalPublisher(Node):
 def ROS_send_goal(x: float, y: float, theta: float) -> str:
     """
     Verwenden, wenn auf Posen gefahren werden soll. \n
-    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der WInkel Theta. Sendet ein Navigationsziel an ROS2.
+    Übergabeparameter sind die X-Koordinate, Y-Koordinate und der Winkel Theta. Sendet ein Navigationsziel an ROS2.
     """
     global ros_object
 
@@ -90,6 +100,46 @@ def ROS_send_goal(x: float, y: float, theta: float) -> str:
     
     ros_object.publish_goal(x,y,theta)
     return f"Ziel gesendet: x={x}, y={y}, theta={theta}"
+
+@tool("ROS_send_two_goals", args_schema=TwoGoalsInput)
+def ROS_send_two_goals(x_1: float, y_1: float, theta_1: float, 
+                       x_2: float, y_2: float, theta_2: float) -> str:
+    """
+    Verwenden, wenn auf zwei Posen nacheinander gefahren werden soll.
+    Übergabeparameter sind:
+    x_1=X-Koordinate von Pose 1
+    y_1=Y-Koordinate von Pose 1
+    theta_1=Theta Winkel von Pose 1
+    x_2=X-Koordinate von Pose 2
+    y_2=Y-Koordinate von Pose 2
+    theta_2=Theta Winkel von Pose 2
+    
+    Sendet zwei Navigationsziele nacheinander an ROS2. Wartet bis Ziel 1 erreicht ist, 
+    bevor Ziel 2 gesendet wird.
+    """
+    global ros_object
+
+    if ros_object is None:
+        return "FEHLER: ROS2 noch nicht initialisiert"
+    
+    # Send first goal
+    ros_object.publish_goal(x_1, y_1, theta_1)
+    
+    # Wait for first goal to complete
+    #success, status_code, message = ros_object.wait_for_goal_completion(timeout=120.0)
+    #while (anhgekommen != true)
+
+    while ros_object.get_status_code()!=4:            #ros_object.goal_reached():
+        time.sleep(0.2)
+    
+    #if not success:
+    #    return f"Erstes Ziel nicht erreicht: {message} (Status: {status_code})"
+    
+    # First goal succeeded, send second goal
+    ros_object.publish_goal(x_2, y_2, theta_2)
+    
+    return (f"Erstes Ziel erreicht: x={x_1}, y={y_1}, theta={theta_1}. "
+            f"Zweites Ziel gesendet: x={x_2}, y={y_2}, theta={theta_2}")
 
 @tool
 def ROS_get_navigation_status():

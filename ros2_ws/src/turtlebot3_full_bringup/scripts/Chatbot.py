@@ -71,7 +71,7 @@ system_prompt= "Du steuerst einen mobilen Roboter per ROS2.\n" \
     "2) Extrahiere zu jedem Ziel die x, y und theta Angaben aus der Wissensbasis, oder aus der Chathistorie.\n" \
     "3) Falls Du nach dem aktuellen Navigationsstatus gefragt wird, melde eine kurze Info zurück. Rufe dazu das geeignete tool auf. " \
     "4) Eine Navigation ist erst beendet, wenn den Navigationsstatus SUCCEDED, CANCELED oder ABORTED ist. Rufe dazu regelmäßig das geeignete tool auf, bis der entsprechende Navigationsstatus von ROS rueckgemeldet wird. Frage die status solange ab, bis eine entsprechende Rueckmeldung vorliegt. Bis dahin nehmen keine neuen anfragen an.\n" \
-    "5) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei mehreren Zielen: warte auf Bestätigung, dann nächstes Ziel.\n\n" \
+    "5) WICHTIG: Rufe für jede Pose die du anfahren sollst das Tool ROS_send_goal(x, y, theta) auf, wenn du die Koordinaten in der Wissensbasis findest. Bei zwei Zielen: Rufe das Tool 'ROS_send_tow_goals'\n\n" \
     "Nur Koordinaten aus der Wissensbasis verwenden."
 
 #aufbauen des vollständigen Prompts mit allen Inhalten
@@ -83,7 +83,6 @@ full_prompt = ChatPromptTemplate.from_messages([
 ])
 
 #RAG initialisieren
-
 RAG_1=RAG_Functions()   #Konstruktor
 RAG_1.text_input() #.tex einlesen
 RAG_1.chunking() #ausführen der Chunking Funktion
@@ -92,7 +91,7 @@ RAG_1.VectorStorage() #VectorStore aufbauen ->Funktion nochmal selbst machen, ha
 
 
 #Tools einbinden
-tools=[ROS_tools.ROS_send_goal, ROS_tools.ROS_get_navigation_status]
+tools=[ROS_tools.ROS_send_goal,ROS_tools.ROS_send_two_goals, ROS_tools.ROS_get_navigation_status]
 
 # Agent anlegen (gehirn/grundfunktionen)
 LLM_agent= create_tool_calling_agent(LLM, tools, full_prompt) 
@@ -120,39 +119,30 @@ if ROS_tools.ros_object is None:
 else:
     print("\n+ + + ROS2 initialisiert + + +\n")
 
+def chat_main_fct(user_input_via_app: str) -> str:
+    global chat_history
 
-def main():
+    # User Anfrage in history
+    chat_history.append(HumanMessage(content=user_input_via_app))
 
-    while True:
-        #Einlesen von Informationen-> UserPrompt
-        UserInput=input("Was möchtest du der AI sagen?")
+    # RAG
+    RAG_1.query(user_input_via_app)
+    similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
 
-        #Abbrunchbedingung
-        if UserInput=="exit":
-            break
+    LLM_input = (
+        f"User Anfrage: {user_input_via_app}\n\n"
+        f"Wissensbasis-chunks:\n{similar_content}"
+    )
 
-         # User Anfrage in history ergänzen
-        chat_history.append(HumanMessage(content=UserInput))
+    #Agenten mit "create_tool_calling_agent" global angelegt (Zeile 98)
+    #Agent_Executor mit "AgentExecutor(...)" angelget (Zeile 100)
 
-        # Ähnliche Vektoren vie RAG finden
-        RAG_1.query(UserInput)
-        similar_content = [doc.page_content for doc in RAG_1.similar_vectors]
+    # Agent_executor ausführen 
+    LLM_Answer = LLM_agent_executor.invoke({
+        "input": LLM_input,
+        "chat_history_LLM": chat_history
+    })
 
-        LLM_input = f"User Anfrage: {UserInput}\n\n" \
-                    f"Wissensbasis-chunks: \n{similar_content}"
-        
-        #LLM-agent Antwort erstellen
-        LLM_answer=LLM_agent_executor.invoke({"input": LLM_input, "chat_history_LLM": chat_history})
-        
-        #Abspeichern der Antwort und anhängen an die Historie
-        chat_history.append(AIMessage(content=LLM_answer["output"]))
+    chat_history.append(AIMessage(content=LLM_Answer["output"]))
 
-        output_str = RAG_1.LLM_OutputAsListToStr(LLM_answer["output"])
-        #print(f"Chatbot: {output_str}")
-
-        anzahl_anfragen=len(chat_history)/2
-
-        print(f"\nAnzahl Nachrichten in Historie: {anzahl_anfragen}")
-
-if __name__ == "__main__":
-    main()
+    return RAG_1.LLM_OutputAsListToStr(LLM_Answer["output"])

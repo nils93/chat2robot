@@ -1,5 +1,5 @@
 import streamlit as st
-from Chatbot import chat_step
+from Chatbot import chat_main_fct
 
 st.set_page_config(
     page_title="Robot Chatbot",
@@ -30,7 +30,7 @@ if prompt := st.chat_input("Wohin soll der Roboter fahren?"):
 
     # Bot Antwort
     with st.chat_message("assistant"):
-        response = chat_step(prompt)
+        response = chat_main_fct(prompt)
         st.markdown(response)
 
     st.session_state.messages.append(

@@ -35,7 +35,9 @@ RUN sudo apt-get update && \
 # ============================================================
 COPY requirements.txt /tmp/requirements.txt
 
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.txt && \
+	pip install streamlit
+	
 
 # ---------- ROS sourcing ----------
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
