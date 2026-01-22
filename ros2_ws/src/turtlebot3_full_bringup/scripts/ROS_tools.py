@@ -10,7 +10,6 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy, DurabilityPo
 from action_msgs.msg import GoalStatusArray
 
 import math
-import threading
 
 
 class GoalInput(BaseModel):
@@ -125,16 +124,11 @@ def ROS_send_two_goals(x_1: float, y_1: float, theta_1: float,
     # Send first goal
     ros_object.publish_goal(x_1, y_1, theta_1)
     
-    # Wait for first goal to complete
-    #success, status_code, message = ros_object.wait_for_goal_completion(timeout=120.0)
-    #while (anhgekommen != true)
 
     while ros_object.get_status_code()!=4:            #ros_object.goal_reached():
         time.sleep(0.2)
     
-    #if not success:
-    #    return f"Erstes Ziel nicht erreicht: {message} (Status: {status_code})"
-    
+   
     # First goal succeeded, send second goal
     ros_object.publish_goal(x_2, y_2, theta_2)
     

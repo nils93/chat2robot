@@ -40,6 +40,7 @@ Step-by-step instructions to set up your environment.
 ## 3. Build the ROS2 workspace
 ```bash
 colcon build
+source install/setup.bash
 ```
 Alternativ:
 ```bash
@@ -57,6 +58,7 @@ docker exec -it ros2_turtlebot3 bash
 ```
 Change folder (TODO: change the path in chatbot.py for Angabe.tex from relative to absolute so we don't need to change folder)
 ```bash
+source install/setup.bash
 cd src/turtlebot3_full_bringup/scripts
 python3 -m streamlit run app.py --server.address 0.0.0.0 --server.port 8501
 ```
