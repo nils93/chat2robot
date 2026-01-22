@@ -41,6 +41,10 @@ Step-by-step instructions to set up your environment.
 ```bash
 colcon build
 ```
+Alternativ:
+```bash
+colcon build --cmake-clean-cache
+```
 ## 4. Launch the ROS2 simulation 
 This will take few moments and throw errors while loading, you can ignor them
 ```bash
