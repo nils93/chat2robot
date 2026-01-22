@@ -3,11 +3,7 @@ from langchain_huggingface import HuggingFaceEmbeddings #Für Embeddings
 from langchain_community.vectorstores import FAISS #Für Speichern der Vektoren
 
 
-from langchain_core.tools   import tool #damit einfache Tools erstellen, auf welche das LLM zugreifen kann
-
 class RAG_Functions:
-    def __init__(self):
-        pass
     
     def text_input(self):
         with open("Angabe.tex", "r", encoding="utf-8") as f:
@@ -33,7 +29,7 @@ class RAG_Functions:
         print("-> 2. Embeddings durchgefuehrt")
 
     def VectorStorage(self):        
-        # Vektordatenbank erstellen-> Nochmal selbst machen, hat Wöber extra in Angabe geschrieben
+        # Vektordatenbank 
         self.VectorDatenbank = FAISS.from_texts(self.chunks, embedding=self.embeddings) #chunks aus chunking FUnktion in FAISS Vektordatenbank laden"""
         print("-> 3. VectorStorage durchgefuehrt")
 
