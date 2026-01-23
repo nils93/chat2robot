@@ -71,3 +71,14 @@ In Terminal: Login with yout email-adress
 Open Browser and open http://0.0.0.0:8501
 ```
 Tell the AI where you want you robot to drive!
+
+
+# Findings
+1. Impact of different languages (e.g. German, English)
+
+
+2. Impact of different chunking hyperparameters or chunking approaches
+
+
+3. Your recommendation for industrial use. Would you recommend a chatbot for controlling
+an industrial robot? What would be the advantages/disadvantages?
